@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Game -> @players(HumanPlayer x 1, ComputerPlayer x 3), @deck(Deck), @score, @dealer, @centre_card, @reserve_card
+require_relative './deck'
+require_relative './card'
+
+# Game -> @players(HumanPlayer x 1, ComputerPlayer x 3), @deck(Deck), @score, @dealer, @centre_card
 # Setup the game:
 #   Player positions are North, South, East, West - human player is South
 #   Set score to 0-0
@@ -15,9 +18,9 @@
 #   Clear the table
 #     Reset all players hands to be empty
 #
-#   Shuffle the deck
-#   Initialize the hand result to 0
+
 #   Deal the cards
+#     Shuffle the deck
 #     5 cards to each of 4 players
 #     1 centre card (face up)
 #     (Remaining cards are unused)
@@ -42,6 +45,7 @@
 #   Next player after dealer becomes dealer
 
 #   Play the hand (trump suit, bidding player, go alone):
+#     Initialize the hand result to 0
 #     Set the ranking of cards based on the trump suit
 #     If the bidder is going alone:
 #       Remove their partner from the hand
@@ -62,56 +66,67 @@
 #       1, 2:                 2, defenders
 #       0:                    4 defenders
 
-RANKS = {
-  '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '?': 15
-}.freeze
-SUITS = { C: '♣', D: '♦', H: '♥', S: '♠', J: 'J' }.freeze
+# Player superclass
+class Player
+  attr_accessor :hand
 
-# A playing card. Expects a suit in format "C/D/H/S/J" where J is Joker.
-class Card
-  def initialize(rank, suit)
-    @rank = rank
-    @suit = suit.to_sym
+  def initialize
+    @hand = []
   end
 
-  def to_s
-    "#{@rank}#{SUITS[@suit]}"
+  def reset_hand
+    @hand.clear
   end
 end
 
-# A deck of cards.
-class Deck
-  attr_reader :cards
+# A human player
+class HumanPlayer < Player
 
-  def initialize(ranks: %w[2 3 4 5 6 7 8 9 T J Q K], suits: %w[C D H S], joker_count: 2)
-    @ranks = ranks
-    @suits = suits
-    @joker_count = joker_count
-    @joker_rank = '?'
-    @joker_suit = 'J'
-    @cards = create_cards
+end
+
+# A computer player.
+class ComputerPlayer < Player
+
+end
+
+# The game
+class Game
+  def initialize
+    @south = HumanPlayer.new
+    @west = HumanPlayer.new
+    @north = HumanPlayer.new
+    @east = HumanPlayer.new
+    @player_order = [@south, @west, @north, @east]
+    @dealer = @east
+    @score = { north_south: 0, east_west: 0 }
+    game_loop
   end
 
-  def shuffle
-    @cards.shuffle!
+  def game_loop
+    # TODO check for winner
+    deal
+    display_board
+    # @player_order.each { |player| p player.hand }
+    # p @centre_card
   end
 
-  private
+  def deal
+    @deck = Deck.new(ranks: %w[9 T J Q K A], joker_count: 1)
+    @player_order.each(&:reset_hand)
+    @deck.shuffle
+    @player_order.each do |player|
+      player.hand = @deck.deal(5)
+    end
+    @centre_card = @deck.deal(1)
+  end
 
-  def create_cards
-    cards = []
-    @ranks.each do |rank|
-      @suits.each do |suit|
-        cards.push(Card.new(rank, suit))
-      end
+  def display_board
+    north_hand = ''
+    @north.hand.each do |card|
+      north_hand += "|#{card} "
     end
-    @joker_count.times do
-      cards.push(Card.new(@joker_rank, @joker_suit))
-    end
-    cards
+    puts "North: #{north_hand}"
   end
 end
 
-deck = Deck.new(ranks: %w[9 T J Q K A], joker_count: 1)
-deck.shuffle
-puts deck.cards
+game = Game.new
