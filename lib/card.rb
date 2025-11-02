@@ -3,7 +3,6 @@
 # A playing card. Expects a suit in format "C/D/H/S/J" where J is Joker.
 class Card
   SUITS = { C: '♣', D: '♦', H: '♥', S: '♠', J: 'J' }.freeze
-  RED_SUITS = Set.new{ [:D, :H] }
 
   def initialize(rank, suit)
     @rank = rank

@@ -70,18 +70,25 @@ require_relative './card'
 class Player
   attr_accessor :hand
 
-  def initialize
+  def initialize(name: 'Unknown')
     @hand = []
+    @name = name
   end
 
   def reset_hand
     @hand.clear
   end
+
+  def to_s
+    @name
+  end
 end
 
 # A human player
 class HumanPlayer < Player
-
+  def initialize(name: 'Unknown')
+    super(name)
+  end
 end
 
 # A computer player.
@@ -92,10 +99,10 @@ end
 # The game
 class Game
   def initialize
-    @south = HumanPlayer.new
-    @west = HumanPlayer.new
-    @north = HumanPlayer.new
-    @east = HumanPlayer.new
+    @south = HumanPlayer.new('South')
+    @west = HumanPlayer.new('West')
+    @north = HumanPlayer.new('North')
+    @east = HumanPlayer.new('East')
     @player_order = [@south, @west, @north, @east]
     @dealer = @east
     @score = { north_south: 0, east_west: 0 }
@@ -103,9 +110,10 @@ class Game
   end
 
   def game_loop
-    # TODO check for winner
+    # TODO: check for winner
     deal
     display_board
+    bid_for_trumps
     # @player_order.each { |player| p player.hand }
     # p @centre_card
   end
@@ -122,10 +130,22 @@ class Game
 
   def display_board
     north_hand = ''
-    @north.hand.each do |card|
-      north_hand += "|#{card} "
-    end
-    puts "North: #{north_hand}"
+    @north.hand.each { |card| north_hand += "|#{card} " }
+    east_hand = ''
+    @east.hand.each { |card| east_hand += "|#{card} " }
+    south_hand = ''
+    @south.hand.each { |card| south_hand += "|#{card} " }
+    west_hand = ''
+    @west.hand.each { |card| west_hand += "|#{card} " }
+    centre_card = @centre_card[0]
+    puts "                    #{north_hand}\n\n"
+    puts "#{west_hand}         #{centre_card}           #{east_hand}\n\n"
+    puts "                    #{south_hand}"
+    puts "Dealer: #{@dealer}"
+  end
+
+  def bid_for_trumps
+
   end
 end
 
