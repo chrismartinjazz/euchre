@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
+require_relative './suits'
+
 # A playing card. Expects a suit in format "C/D/H/S/J" where J is Joker.
 class Card
-  SUITS = { C: '♣', D: '♦', H: '♥', S: '♠', J: 'J' }.freeze
+  attr_reader :rank, :suit
 
   def initialize(rank, suit)
     @rank = rank
-    @suit = suit.to_sym
+    @suit = suit.to_s.upcase.to_sym
   end
 
   def to_s
-    suit = @suit == :D || @suit == :H ? "\e[31m#{SUITS[@suit]}\e[0m" : SUITS[@suit]
+    suit = @suit == :D || @suit == :H ? "\e[31m#{SUITS[@suit][:glyph]}\e[0m" : SUITS[@suit][:glyph]
     "#{@rank}#{suit}"
   end
 end
