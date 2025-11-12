@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
+require 'card'
+
 # A deck of cards.
 class Deck
   attr_reader :cards
 
-  def initialize(ranks: %w[2 3 4 5 6 7 8 9 T J Q K A], suits: %w[C D H S], joker_count: 2)
+  def initialize(ranks: %i[2 3 4 5 6 7 8 9 T J Q K A], suits: %i[C D H S], joker_count: 0)
     @ranks = ranks
     @suits = suits
     @joker_count = joker_count
-    @joker_rank = '?'
-    @joker_suit = 'J'
+    @joker_rank = '?'.to_sym
+    @joker_suit = :J
     @cards = create_cards
   end
 
@@ -21,18 +23,18 @@ class Deck
     @cards.shift(count) if @cards.length >= count
   end
 
+  def draw_one
+    @cards.shift if @cards.length.positive?
+  end
+
   private
 
   def create_cards
     cards = []
     @ranks.each do |rank|
-      @suits.each do |suit|
-        cards.push(Card.new(rank, suit))
-      end
+      @suits.each { |suit| cards.push(Card.new(rank, suit)) }
     end
-    @joker_count.times do
-      cards.push(Card.new(@joker_rank, @joker_suit))
-    end
+    @joker_count.times { cards.push(Card.new(@joker_rank, @joker_suit)) }
     cards
   end
 end

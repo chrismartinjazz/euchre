@@ -34,14 +34,14 @@ Game loop(dealer):
       Direct dealer to pick up card
         Dealer picks up centre card and removes a card of his choice (including centre card) from his hand
         Set trump suit based on centre card and bidding player
-        Bidder chooses and announces if "going alone": set go alone
+        TODO: Bidder chooses and announces if "going alone": set go alone
       Pass
     If no suit has been set as trumps:
       Set available suits to be all that are not bidding card suit
       Each player in turn starting with the player after dealer can either:
         Nominate a suit to be trumps
           Set trump suit and bidding player
-          Bidder chooses and announces if "going alone": set go alone
+          TODO: Bidder chooses and announces if "going alone": set go alone
         Pass
   If a trump suit has been set:
     Play the hand (trumps, bidding player, go alone), update hand result
@@ -50,16 +50,16 @@ Game loop(dealer):
 
   Play the hand (trump suit, bidding player, go alone):
     Initialize the hand result to 0
-    Set the ranking of cards based on the trump suit
-    If the bidder is going alone:
-      Remove their partner from the hand
+    TODO: If the bidder is going alone:
+      TODO: Remove their partner from the hand
     Start player is player after the dealer
     Set bidding team hand score to 0
     5 times:
       Start player chooses and plays a card
+      Set the ranking of cards based on the trump suit and the lead suit
       Set of current suit cards determined based on that card's suit and the trump suit
       Each other player in turn plays a card
-        Must play a card from current suit set if have one in hand
+        Must play a card from current suit set if have one in hand, otherwise can play any card
       Result of hand evaluated based on ranking of cards
       If the bidding team won the hand, increment their hand score by 1
       Start player is set to winner of hand

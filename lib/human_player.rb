@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 
-require_relative './player'
-require_relative './suits'
+require_relative 'player'
+require_relative 'suits'
 
 # A human player
 class HumanPlayer < Player
   def initialize(name: 'Unknown')
-    super(name: name)
-    @trumps_text = { 'C': 'Clubs (C)', 'D': 'Diamonds (D)', 'H': 'Hearts (H)', 'S': 'Spades (S)' }
+    super
   end
 
   def bid_centre_card(centre_card)
     prompt = "Bid - dealer pick up #{centre_card} (1) or pass (2):"
     input = get_upcase_input(prompt, %w[1 2], "Type '1' or '2'")
-    return 'pick up' if input == '1'
+    return :pick_up if input == '1'
 
-    'pass'
+    :pass
   end
 
   def bid_trumps(available_trumps)
@@ -26,7 +25,7 @@ class HumanPlayer < Player
     valid_inputs = available_trumps.map(&:to_s) + ['P']
 
     bid = get_upcase_input(prompt, valid_inputs, valid_input_text)
-    return 'pass' if bid == 'P'
+    return :pass if bid == 'P'
 
     bid.to_sym
   end
@@ -35,13 +34,43 @@ class HumanPlayer < Player
     "#{text} (#{text[0].upcase})"
   end
 
-  def exchange_card(card, trumps)
+  def exchange_card(card, _trumps)
     @hand.push(card)
-    hand_text = ''
-    @hand.each { |card| hand_text += "|#{card} " }
-    prompt = "#{@name}\nChoose a card to discard (1-6):\n#{hand_text}\n 1   2   3   4   5   6"
-    index = get_upcase_input(prompt, %w[1 2 3 4 5 6], 'Enter a number from 1 to 6.', 1).to_i - 1
+    prompt = "Choose a card to discard (1-6):\n#{hand_text}\n#{number_options_text(6)}"
+    index = get_upcase_input(prompt, %w[1 2 3 4 5 6], 'Enter a number from 1 to 6.').to_i - 1
     @hand.delete_at(index)
+  end
+
+  def play_card(trumps, tricks, trick_index)
+    # Determine the cards that can be played, then choose one of the available cards.
+    current_trick = tricks[trick_index]
+    lead_suit = current_trick.length.positive? ? current_trick[0].suit(trumps) : nil
+    can_follow_suit = @hand.any? { |card| card.suit(trumps) == lead_suit }
+    valid_hand_indices = []
+
+    # Determine which card indices from the player's hand can be played.
+    if can_follow_suit
+      @hand.each_with_index { |card, index| valid_hand_indices.push(index) if card.suit(trumps) == lead_suit }
+    else
+      valid_hand_indices = [*0..(@hand.length - 1)]
+    end
+    valid_hand_input = valid_hand_indices.map { |card| (card + 1).to_s}
+
+    prompt = "Choose a card to play (1-#{@hand.length}):\n#{hand_text}\n#{number_options_text(@hand.length)}"
+    index = get_upcase_input(prompt, valid_hand_input, 'Choose a valid card to play.').to_i - 1
+    @hand.delete_at(index)
+  end
+
+  def hand_text
+    "|#{@hand.join(' |')}"
+  end
+
+  def number_options_text(max)
+    output = " 1"
+    return output if max == 1
+
+    2.upto(max) { |number| output += "   #{number}" }
+    output
   end
 
   def get_upcase_input(prompt, valid_input, invalid_input_message = 'Try again!', input_length = 1)
