@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'card'
+require_relative 'card'
 
 # A deck of cards.
 class Deck

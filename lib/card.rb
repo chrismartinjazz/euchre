@@ -15,7 +15,7 @@ class Card
     # If no suit is specified, return the card's native suit
     return @suit if trumps.nil?
 
-    # If the card is a joker, return the trumps suit (nil if not supplied)
+    # If the card is a joker, return the trumps suit
     return trumps if @suit == :J
 
     # If the card is a Jack, handle left and right bower

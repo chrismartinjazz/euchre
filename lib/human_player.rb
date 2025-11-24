@@ -44,7 +44,7 @@ class HumanPlayer < Player
   def play_card(trumps, tricks, trick_index)
     # Determine the cards that can be played, then choose one of the available cards.
     current_trick = tricks[trick_index]
-    lead_suit = current_trick.length.positive? ? current_trick[0].suit(trumps) : nil
+    lead_suit = current_trick.lead_suit
     can_follow_suit = @hand.any? { |card| card.suit(trumps) == lead_suit }
     valid_hand_indices = []
 

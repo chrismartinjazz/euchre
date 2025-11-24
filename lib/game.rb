@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'deck'
-require_relative 'card'
-require_relative 'player'
-require_relative 'human_player'
-require_relative 'computer_player'
+require 'deck'
+require 'card'
+require 'ranks'
+require 'player'
+require 'human_player'
+require 'computer_player'
+require 'hand_manager'
 
 # The game
 class Game
@@ -17,10 +19,7 @@ class Game
     @player_teams = { north: :north_south, south: :north_south, east: :east_west, west: :east_west }
     @dealer = @east
     @score = { north_south: 0, east_west: 0 }
-    @trumps = nil
-    @bidder = nil
-    @bidding_team = nil
-    @tricks = [[], [], [], [], []].freeze
+    # Break the logic for managing the progress of an individual hand into a separate object, HandManager
   end
 
   def start_game_loop
@@ -28,24 +27,31 @@ class Game
       # TODO: check for winner
       deal
       display_board
-      @trumps, @bidder = bid_for_trumps
+      trumps, bidder = bid_for_trumps
+      if trumps.nil?
+        @dealer = player_after(@dealer)
+        next
+      end
+
+      bidding_team = @player_teams[bidder]
+      @trick_manager = TrickManager.new(trumps, bidder, bidding_team, @player_order, @player_teams)
       display_board
       # TODO: Add "bidder goes alone"
-      @bidding_team = @player_teams[@bidder]
-      play_hand(@bidding_team) unless @trumps.nil?
+      result = @trick_manager.play_tricks(@bidding_team)
+      handle_result(result)
 
       @dealer = player_after(@dealer)
     end
   end
 
   def deal
-    @deck = Deck.new(ranks: %w[9 T J Q K A], joker_count: 1)
+    @deck = Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
     @player_order.each(&:reset_hand)
     @deck.shuffle
     @player_order.each do |player|
       player.hand = @deck.deal(5)
     end
-    @centre_card = @deck.deal(1)[0]
+    @centre_card = @deck.draw_one
   end
 
   def display_board
@@ -92,19 +98,9 @@ class Game
     nil
   end
 
-  def play_hand(bidding_team)
-    tricks_won_by_bidding_team = 0
-    playing_order = player_order_starting_with(player_after(@dealer))
-    5.times do |trick_number|
-      trick_winner = play_trick(playing_order, trick_number)
-    end
-  end
 
-  def play_trick(playing_order, trick_number)
-    playing_order.each do |player|
-      @tricks[trick_number].push(player.play_card(@trumps, @tricks, trick_number))
-    end
-  end
+
+
 
   def rank_cards
     # If trumps is led:
