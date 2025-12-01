@@ -6,27 +6,35 @@ require_relative 'ranks'
 class Trick
   attr_reader :plays, :lead_suit
 
-  def initialize(trumps)
+  def initialize(trumps, player_count = 4)
     @trumps = trumps
     @lead_suit = nil
     @plays = []
+    @player_count = player_count
   end
 
   def add(player, card)
-    @lead_suit = card.suit if @lead_suit.nil?
+    @lead_suit = card.suit(@trumps) if @lead_suit.nil?
     @plays.push({ player: player, card: card, rating: evaluate_card(card) })
   end
 
-  def winning_play
-    @plays.length >= 4 ? @plays.max_by { |play| play[:rating] } : nil
+  def winner
+    trick_complete? ? winning_play[:player] : nil
   end
 
-  def winner
-    winning_play[:player] || nil
+  def winning_play
+    @plays.max_by { |play| play[:rating] }
+  end
+
+  def trick_complete?
+    @plays.length == @player_count
   end
 
   def card(player)
-    @plays.find { |play| play[:player] == player }
+    my_play = @plays.find { |play| play[:player] == player }
+    return my_play[:card] if my_play
+
+    nil
   end
 
   private

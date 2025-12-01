@@ -4,44 +4,46 @@ require_relative 'trick'
 require_relative 'suits'
 
 # Manages the playing of successive tricks, updates player order based on the winner of previous trick,
-# tracks the score, and reports the winning team and points scored.
+# tracks the score, and reports the winning team ('bidders' or 'defenders') and points scored.
 class TrickManager
   HAND_SIZE = 5
   TRICK_SCORES_TO_POINTS = [4, 2, 2, 1, 2].freeze
   BIDDERS_MUST_WIN_N_TRICKS = (HAND_SIZE / 2) + 1
   SWEEP_BONUS = 2
+  MIN_COL_WIDTH = 7
 
   def initialize(trumps = nil, tricks = nil)
     @trumps = trumps
     @tricks = tricks.nil? ? Array.new(HAND_SIZE) { Trick.new(@trumps) } : tricks
   end
 
-  def play_hand(going_alone, bidding_team, defending_team, player_order, player_teams)
-    @going_alone = going_alone
-    @bidding_team = bidding_team
-    @defending_team = defending_team
-    @player_order = player_order
-    @player_teams = player_teams
-    @display_order = player_order # Always display trick plays in same order
-
-    @trick_score = 0
-
-    display_header
+  def play_hand(going_alone, bidding_team, player_order)
+    init_hand(going_alone, bidding_team, player_order)
 
     HAND_SIZE.times do |index|
       play_trick(index)
       @trick_score += 1 if bidding_team_wins_trick?(index)
-      @player_order = player_order_starting_with(@tricks[index].winner)
+      rotate_player_order_to_start_with(@tricks[index].winner)
     end
 
     {
-      winners: bidding_team_wins_hand?(@trick_score) ? @bidding_team : @non_bidding_team,
-      points: score_hand(@trick_score)
+      winners: bidding_team_wins_hand? ? 'bidders' : 'defenders',
+      points: score_hand
     }
+  end
+
+  def init_hand(going_alone, bidding_team, player_order)
+    @going_alone = going_alone
+    @bidding_team = bidding_team
+    @player_order = player_order
+    @display_order = player_order.dup # Always display trick plays in same order
+
+    @trick_score = 0
   end
 
   def play_trick(index)
     @player_order.each do |player|
+      display_header
       display_tricks
       card = player.play_card(@trumps, @tricks, index)
       @tricks[index].add(player, card)
@@ -49,17 +51,15 @@ class TrickManager
   end
 
   def bidding_team_wins_trick?(index)
-    @player_teams[@tricks[index].winner] == @bidding_team
+    @bidding_team.include?(@tricks[index].winner)
   end
 
-  def player_order_starting_with(starting_player)
-    order = @player_order.dup
-    order.find_index(starting_player).times { order.push(order.unshift) }
-    order
+  def rotate_player_order_to_start_with(starting_player)
+    @player_order.rotate!(@player_order.find_index(starting_player))
   end
 
   def bidding_team_wins_hand?
-    @trick_score >= WINNERS_MUST_WIN_N_TRICKS
+    @trick_score >= BIDDERS_MUST_WIN_N_TRICKS
   end
 
   def score_hand
@@ -69,37 +69,64 @@ class TrickManager
   end
 
   def sweep_bonus?
-    (@trick_score.zero? || @trick_score == HAND_SIZE) && @going_alone
+    @trick_score.zero? || @trick_score == HAND_SIZE
   end
 
   def display_header
-    my_trumps = "Trumps: #{SUITS[@trumps][:glyph]}"
-    my_bidders = "Bidders: #{@bidding_team}"
-    my_defenders = "Defenders: #{@defending_team}"
-    puts "#{my_trumps} #{my_bidders} #{my_defenders}"
+    bidding_team_string = @bidding_team.map(&:to_s).join(' ')
+    puts "Bidders: #{bidding_team_string} ... Tricks: #{@trick_score}"
   end
 
   def display_tricks
-    # Set the width of the column to be the maximum player name length
+    col_width = calculate_col_width
+    header = generate_trick_table_header(col_width)
+    table = generate_trick_table(col_width)
+
+    puts header
+    puts table
+  end
+
+  def calculate_col_width
     max_player_name_length = @display_order.max_by { |player| player.to_s.length }.to_s.length
-    col_width = [max_player_name_length + 2, 5].max
+    [max_player_name_length + 3, MIN_COL_WIDTH].max
+  end
 
-    # Add the header with player names to the display string
-    #      North  East   South  West   Winner
-    output = '     '
-    output += @display_order.map { |player| player.name += ' ' * (col_width - player.name.length) }
-    output += 'Winner'
-
-    @tricks.each_with_index do |trick, index|
-      trick_string = "#{i + 1}: | "
-      trick_string += @player_order.each { |player| trick.card(player) || '  ' }.join('| ')
-      trick_string += trick.winner
-      output += trick_string
-      output += "\n"
+  def generate_trick_table_header(col_width)
+    header = "#{SUITS[@trumps][:glyph]}    "
+    @display_order.each do |player|
+      header += player.name
+      header += ' ' * (col_width - player.name.length)
     end
-    puts output
-    #      North  East   South  West   Winner
-    # 1: | AD   | KD   | KS   | 9C   | West
-    # 2: |      |      |      |      |
+    header += 'Winner'
+    header
+  end
+
+  def generate_trick_table(col_width)
+    table = ''
+    @tricks.each_with_index do |trick, index|
+      table += generate_trick_row(trick, index, col_width)
+    end
+    table
+  end
+
+  def generate_trick_row(trick, index, col_width)
+    number = index + 1
+    lead_suit_glyph = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
+    cards = generate_cards_for_trick_row(trick, col_width)
+    winner = trick.winner ? trick.winner.to_s : ''
+
+    "#{number}:#{lead_suit_glyph}| #{cards}#{winner}\n"
+  end
+
+  def generate_cards_for_trick_row(trick, col_width)
+    cards = ''
+    @display_order.each do |player|
+      player_card = trick.card(player).nil? ? '  ' : trick.card(player).to_s
+      winning_card_indication = trick.winning_play && trick.winning_play[:card] == trick.card(player) ? ' *' : '  '
+      padding = ' ' * (col_width - 6)
+
+      cards += "#{player_card}#{winning_card_indication}#{padding}| "
+    end
+    cards
   end
 end

@@ -30,8 +30,7 @@ class Card
 
   def to_s
     glyph = SUITS[@suit][:glyph]
-    suit = red_suit?(@suit) ? red(glyph) : glyph
-    "#{@rank}#{suit}"
+    "#{@rank}#{glyph}"
   end
 
   private
@@ -42,9 +41,5 @@ class Card
 
   def black_suit?(suit)
     suit == :C || suit == :S
-  end
-
-  def red(text)
-    "\e[31m#{text}\e[0m"
   end
 end

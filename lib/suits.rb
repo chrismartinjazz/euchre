@@ -7,11 +7,11 @@ SUITS = {
   },
   D: {
     text: 'Diamonds',
-    glyph: '♦'
+    glyph: "\e[31m♦\e[0m"
   },
   H: {
     text: 'Hearts',
-    glyph: '♥'
+    glyph: "\e[31m♥\e[0m"
   },
   S: {
     text: 'Spades',

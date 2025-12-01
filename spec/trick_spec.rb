@@ -4,16 +4,20 @@ require 'trick'
 require 'card'
 require 'player'
 
-# trick.add(player: card, player)
-# trick.winner
-# trick.rate_card
-
 RSpec.describe Trick do
   context 'with four players, south, west, north and east' do
     south = Player.new(name: "South")
     west = Player.new(name: "West")
     north = Player.new(name: "North")
     east = Player.new(name: "East")
+
+    it 'adds a card to a trick successfully' do
+      trick = Trick.new(:C)
+      ten_of_diamonds = Card.new(:T, :D)
+      trick.add(south, ten_of_diamonds)
+      expect(trick.plays[0][:player]).to eq south
+      expect(trick.plays[0][:card]).to eq ten_of_diamonds
+    end
 
     it 'identifies winning plays in the lead suit, with other non-trump cards' do
       ten_of_diamonds = Card.new(:T, :D)
@@ -24,13 +28,16 @@ RSpec.describe Trick do
 
       trick = Trick.new(trumps)
       trick.add(south, ten_of_diamonds)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :T, suit: :D)
+      expect(trick.winning_play[:card]).to eq ten_of_diamonds
       trick.add(west, king_of_diamonds)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :K, suit: :D)
+      expect(trick.winning_play[:card]).to eq king_of_diamonds
       trick.add(north, nine_of_diamonds)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :K, suit: :D)
+      expect(trick.winning_play[:card]).to eq king_of_diamonds
+      expect(trick.winner).to eq nil
+
       trick.add(north, ace_of_spades)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :K, suit: :D)
+      expect(trick.winning_play[:card]).to eq king_of_diamonds
+      expect(trick.winner).to eq west
     end
     it 'identifies winning plays considering the suit that is lead, and trumping the leader' do
       ten_of_diamonds = Card.new(:T, :D)
@@ -41,13 +48,14 @@ RSpec.describe Trick do
 
       trick = Trick.new(trumps)
       trick.add(south, ten_of_diamonds)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :T, suit: :D)
+      expect(trick.winning_play[:card]).to eq ten_of_diamonds
       trick.add(west, ace_of_spades)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :T, suit: :D)
+      expect(trick.winning_play[:card]).to eq ten_of_diamonds
       trick.add(north, nine_of_diamonds)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :T, suit: :D)
+      expect(trick.winning_play[:card]).to eq ten_of_diamonds
       trick.add(north, nine_of_clubs)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :'9', suit: :C)
+      expect(trick.winning_play[:card]).to eq nine_of_clubs
+      expect(trick.winner).to eq north
     end
 
     it 'identifies winning plays in tricks including the joker and bowers' do
@@ -59,13 +67,32 @@ RSpec.describe Trick do
 
       trick = Trick.new(trumps)
       trick.add(east, ace_of_clubs)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :A, suit: :C)
+      expect(trick.winning_play[:card]).to eq ace_of_clubs
       trick.add(south, jack_of_spades)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :J, suit: :S)
+      expect(trick.winning_play[:card]).to eq jack_of_spades
       trick.add(west, jack_of_clubs)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :J, suit: :C)
+      expect(trick.winning_play[:card]).to eq jack_of_clubs
       trick.add(north, joker)
-      expect(trick.winning_play[:card]).to have_attributes(rank: :'?', suit: :J)
+      expect(trick.winning_play[:card]).to eq joker
+      expect(trick.winner).to eq north
+    end
+
+    it 'reports the card played by a given player in a trick' do
+      joker = Card.new(:'?', :J)
+      jack_of_clubs = Card.new(:J, :C)
+      jack_of_spades = Card.new(:J, :S)
+      ace_of_clubs = Card.new(:A, :C)
+      trumps = :C
+
+      trick = Trick.new(trumps)
+      expect(trick.card(east)).to eq nil
+      trick.add(east, ace_of_clubs)
+
+      trick.add(south, jack_of_spades)
+      trick.add(west, jack_of_clubs)
+      trick.add(north, joker)
+      expect(trick.card(east)).to eq ace_of_clubs
+      expect(trick.card(south)).to eq jack_of_spades
     end
   end
 end
