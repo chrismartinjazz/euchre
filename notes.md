@@ -17,7 +17,7 @@ Game -> @players(HumanPlayer x 1, ComputerPlayer x 3), @deck(Deck), @score, @dea
 ### Game Loop
 
 Game loop(dealer):
-  Check for a winner: if either team has 6 or more points
+  Check for a winner: if either team has 11 or more points
     announce the winners
     exit the game loop
   Clear the table

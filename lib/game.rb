@@ -1,31 +1,36 @@
 # frozen_string_literal: true
 
-require 'deck'
-require 'card'
-require 'ranks'
-require 'player'
-require 'human_player'
-require 'computer_player'
-require 'hand_manager'
+require_relative 'deck'
+require_relative 'card'
+require_relative 'ranks'
+require_relative 'player'
+require_relative 'human_player'
+require_relative 'computer_player'
+require_relative 'trick_manager'
 
 # The game
 class Game
+  POINTS_TO_WIN_GAME = 11
+
   def initialize
     @south = HumanPlayer.new(name: 'South')
     @west = HumanPlayer.new(name: 'West')
     @north = HumanPlayer.new(name: 'North')
     @east = HumanPlayer.new(name: 'East')
     @player_order = [@south, @west, @north, @east]
-    @player_teams = { north: :north_south, south: :north_south, east: :east_west, west: :east_west }
+    @team1 = [@south, @north]
+    @team2 = [@east, @west]
     @dealer = @east
-    @score = { north_south: 0, east_west: 0 }
-    # Break the logic for managing the progress of an individual hand into a separate object, HandManager
+    @score = { @team1 => 0, @team2 => 0 }
   end
 
   def start_game_loop
     loop do
-      # TODO: check for winner
+      break if game_over?
+
+      rotate_player_order_to_start_with(player_after(@dealer))
       deal
+      display_score
       display_board
       trumps, bidder = bid_for_trumps
       if trumps.nil?
@@ -33,15 +38,27 @@ class Game
         next
       end
 
-      bidding_team = @player_teams[bidder]
-      @trick_manager = TrickManager.new(trumps, bidder, bidding_team, @player_order, @player_teams)
-      display_board
+      bidding_team = @team1.include?(bidder) ? @team1 : @team2
+      defending_team = bidding_team == @team1 ? @team2 : @team1
+
+      @trick_manager = TrickManager.new(trumps)
       # TODO: Add "bidder goes alone"
-      result = @trick_manager.play_tricks(@bidding_team)
-      handle_result(result)
+      result = @trick_manager.play_hand(false, bidding_team, @player_order)
+      if result[:winner] == 'bidders'
+        @score[bidding_team] += result[:points]
+      else
+        @score[defending_team] += result[:points]
+      end
 
       @dealer = player_after(@dealer)
     end
+
+    puts 'Game Over!'
+    display_score
+  end
+
+  def game_over?
+    @score[@team1] >= POINTS_TO_WIN_GAME || @score[@team2] >= POINTS_TO_WIN_GAME
   end
 
   def deal
@@ -72,22 +89,26 @@ class Game
     puts "Bidder: #{@bidder}"
   end
 
-  # Return the trump as a symbol (:C) or nil
+  # Return the trump as a symbol (:C) and the bidder (player object) or nil if all pass twice.
   def bid_for_trumps
-    # TODO: Handle the case where the centre_card is the joker
-    bidding_order = player_order_starting_with(player_after(@dealer))
-    bidding_order.each do |player|
-      player_bid = player.bid_centre_card(@centre_card) # 'pick up' or 'pass'
+    # Handle the case where the centre_card is the joker
+    joker_suit = @centre_card.suit == :J ? @dealer.choose_a_suit : nil
+
+    @player_order.each do |player|
+      player_bid = player.bid_centre_card(@centre_card, joker_suit) # 'pick up' or 'pass'
       next if player_bid == 'pass'
 
-      trumps = @centre_card.suit
+      trumps = joker_suit.nil? ? @centre_card.suit : joker_suit
       @dealer.exchange_card(@centre_card, trumps)
       return trumps, player
     end
 
+    # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
     available_trumps = %i[C D S H]
     available_trumps.delete(@centre_card.suit)
-    bidding_order.each do |player|
+    available_trumps.delete(joker_suit)
+
+    @player_order.each do |player|
       player_bid = player.bid_trumps(available_trumps)
       next if player_bid == 'pass'
 
@@ -95,46 +116,8 @@ class Game
       return trumps, player
     end
 
+    # If all players have passed again...
     nil
-  end
-
-
-
-
-
-  def rank_cards
-    # If trumps is led:
-    # Joker
-    # J of trump suit
-    # J of same color
-    # A
-    # K
-    # Q
-    # T
-    # 9
-    # ---
-    # all others.
-    #
-    # If another suit is led:
-    # Joker
-    # J of trump suit
-    # J of same color
-    # A
-    # K
-    # Q
-    # T
-    # 9
-    # ---
-    # A of lead suit
-    # K
-    # Q
-    # J
-    # T
-    # 9
-    # ---
-    # all others
-
-    #
   end
 
   def player_after(player)
@@ -144,9 +127,17 @@ class Game
     @player_order[player_index + 1]
   end
 
-  def player_order_starting_with(starting_player)
-    order = @player_order.dup
-    order.find_index(starting_player).times { order.push(order.unshift) }
-    order
+  def rotate_player_order_to_start_with(starting_player)
+    @player_order.rotate!(@player_order.find_index(starting_player))
+  end
+
+  def display_score
+    puts "SCOREBOARD"
+    puts "#{team_names(@team1)}: #{@score[@team1]} points"
+    puts "#{team_names(@team2)}: #{@score[@team2]} points"
+  end
+
+  def team_names(team)
+    team.map(&:to_s).join(' ')
   end
 end

@@ -7,7 +7,7 @@ require_relative 'suits'
 # tracks the score, and reports the winning team ('bidders' or 'defenders') and points scored.
 class TrickManager
   HAND_SIZE = 5
-  TRICK_SCORES_TO_POINTS = [4, 2, 2, 1, 2].freeze
+  TRICK_SCORES_TO_POINTS = [2, 2, 2, 1, 1, 2].freeze
   BIDDERS_MUST_WIN_N_TRICKS = (HAND_SIZE / 2) + 1
   SWEEP_BONUS = 2
   MIN_COL_WIDTH = 7
@@ -69,7 +69,7 @@ class TrickManager
   end
 
   def sweep_bonus?
-    @trick_score.zero? || @trick_score == HAND_SIZE
+    @trick_score == HAND_SIZE && @going_alone
   end
 
   def display_header

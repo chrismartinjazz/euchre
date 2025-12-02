@@ -9,12 +9,13 @@ class HumanPlayer < Player
     super
   end
 
-  def bid_centre_card(centre_card)
+  def bid_centre_card(centre_card, joker_suit)
+    puts "Centre card is the Joker - suit is #{SUITS[joker_suit][:glyph]}" if joker_suit
     prompt = "Bid - dealer pick up #{centre_card} (1) or pass (2):"
     input = get_upcase_input(prompt, %w[1 2], "Type '1' or '2'")
-    return :pick_up if input == '1'
+    return 'pick_up' if input == '1'
 
-    :pass
+    'pass'
   end
 
   def bid_trumps(available_trumps)
@@ -73,7 +74,17 @@ class HumanPlayer < Player
     output
   end
 
-  def get_upcase_input(prompt, valid_input, invalid_input_message = 'Try again!', input_length = 1)
+  def choose_a_suit
+    suit_options = SUITS.except(:J).each_with_object([]) { |(key, value), array| array << "#{key}(#{value[:glyph]}) " }
+    prompt = "Choose a suit for the centre card: #{suit_options.join(' ')}"
+    valid_suit_input = SUITS.except(:J).each_with_object([]) { |(key, value), object| object << key.to_s.slice(0) }
+
+    get_upcase_input(prompt, valid_suit_input).to_sym
+  end
+
+  def get_upcase_input(prompt, valid_input, invalid_input_message = nil, input_length = 1)
+    invalid_input_message = "Try again! Options are #{valid_input.join(', ')}" if invalid_input_message.nil?
+
     loop do
       print "** #{@name} **\n#{prompt}\n>> "
       input = gets.chomp[input_length - 1].upcase
