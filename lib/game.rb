@@ -26,29 +26,40 @@ class Game
 
   def start_game_loop
     loop do
-      break if game_over?
-
       rotate_player_order_to_start_with(player_after(@dealer))
       deal
       display_score
+      # TODO: If centre card is a joker - must choose suit before displaying cards.
       display_board
-      trumps, bidder = bid_for_trumps
+      trumps, bidder, going_alone = bid_for_trumps
+
+
       if trumps.nil?
         @dealer = player_after(@dealer)
         next
       end
 
-      bidding_team = @team1.include?(bidder) ? @team1 : @team2
-      defending_team = bidding_team == @team1 ? @team2 : @team1
+      bidding_team = if going_alone
+                       [bidder]
+                     elsif @team1.include?(bidder)
+                       @team1
+                     else
+                       @team2
+                     end
+      defending_team = @team1.include?(bidding_team[0]) ? @team2 : @team1
+      trick_player_order = @player_order.filter do |player|
+        bidding_team.include?(player) || defending_team.include?(player)
+      end
 
       @trick_manager = TrickManager.new(trumps)
-      # TODO: Add "bidder goes alone"
-      result = @trick_manager.play_hand(false, bidding_team, @player_order)
+
+      result = @trick_manager.play_hand(going_alone, bidding_team, trick_player_order)
       if result[:winner] == 'bidders'
         @score[bidding_team] += result[:points]
       else
         @score[defending_team] += result[:points]
       end
+      break if game_over?
 
       @dealer = player_after(@dealer)
     end
@@ -91,16 +102,16 @@ class Game
 
   # Return the trump as a symbol (:C) and the bidder (player object) or nil if all pass twice.
   def bid_for_trumps
-    # Handle the case where the centre_card is the joker
+    # If the centre card is a joker, ask the dealer to nominate a suit and use this suit for first round of bidding.
     joker_suit = @centre_card.suit == :J ? @dealer.choose_a_suit : nil
 
     @player_order.each do |player|
-      player_bid = player.bid_centre_card(@centre_card, joker_suit) # 'pick up' or 'pass'
+      player_bid, going_alone = player.bid_centre_card(@centre_card, joker_suit) # 'pick up' or 'pass'
       next if player_bid == 'pass'
 
       trumps = joker_suit.nil? ? @centre_card.suit : joker_suit
       @dealer.exchange_card(@centre_card, trumps)
-      return trumps, player
+      return trumps, player, going_alone
     end
 
     # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
@@ -109,11 +120,11 @@ class Game
     available_trumps.delete(joker_suit)
 
     @player_order.each do |player|
-      player_bid = player.bid_trumps(available_trumps)
+      player_bid, going_alone = player.bid_trumps(available_trumps)
       next if player_bid == 'pass'
 
       trumps = player_bid
-      return trumps, player
+      return trumps, player, going_alone
     end
 
     # If all players have passed again...

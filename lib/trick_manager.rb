@@ -37,7 +37,6 @@ class TrickManager
     @bidding_team = bidding_team
     @player_order = player_order
     @display_order = player_order.dup # Always display trick plays in same order
-
     @trick_score = 0
   end
 

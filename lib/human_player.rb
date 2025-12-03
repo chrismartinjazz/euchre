@@ -13,22 +13,21 @@ class HumanPlayer < Player
     puts "Centre card is the Joker - suit is #{SUITS[joker_suit][:glyph]}" if joker_suit
     prompt = "Bid - dealer pick up #{centre_card} (1) or pass (2):"
     input = get_upcase_input(prompt, %w[1 2], "Type '1' or '2'")
-    return 'pick_up' if input == '1'
+    return 'pass', false if input == '2'
 
-    'pass'
+    ['pick up', going_alone?]
   end
 
   def bid_trumps(available_trumps)
     available_trumps_list = available_trumps.collect { |trump| text_with_option(SUITS[trump][:text]) }.join(', ')
     available_trumps_list += ' or Pass (P)'
     prompt = "Bid - #{available_trumps_list}:"
-    valid_input_text = "Type #{available_trumps.join(', ')}, or P"
     valid_inputs = available_trumps.map(&:to_s) + ['P']
 
-    bid = get_upcase_input(prompt, valid_inputs, valid_input_text)
-    return :pass if bid == 'P'
+    bid = get_upcase_input(prompt, valid_inputs)
+    return 'pass' if bid == 'P'
 
-    bid.to_sym
+    [bid.to_sym, going_alone?]
   end
 
   def text_with_option(text)
@@ -80,6 +79,10 @@ class HumanPlayer < Player
     valid_suit_input = SUITS.except(:J).each_with_object([]) { |(key, value), object| object << key.to_s.slice(0) }
 
     get_upcase_input(prompt, valid_suit_input).to_sym
+  end
+
+  def going_alone?
+    get_upcase_input("Will you 'go alone'? Y/N", %w[Y N]) == 'Y'
   end
 
   def get_upcase_input(prompt, valid_input, invalid_input_message = nil, input_length = 1)
