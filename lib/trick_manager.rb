@@ -12,32 +12,29 @@ class TrickManager
   SWEEP_BONUS = 2
   MIN_COL_WIDTH = 7
 
-  def initialize(trumps = nil, tricks = nil)
+  def initialize(trumps, going_alone, bidding_team, player_order, tricks = nil)
     @trumps = trumps
-    @tricks = tricks.nil? ? Array.new(HAND_SIZE) { Trick.new(@trumps) } : tricks
+    @going_alone = going_alone
+    @bidding_team = bidding_team
+    @player_order = player_order
+    @tricks = tricks.nil? ? Array.new(HAND_SIZE) { Trick.new(@trumps, @player_order.length) } : tricks
+    @display_order = player_order.dup # Always display trick plays in same order
+    @trick_score = 0
   end
 
-  def play_hand(going_alone, bidding_team, player_order)
-    init_hand(going_alone, bidding_team, player_order)
-
+  def play_hand
     HAND_SIZE.times do |index|
       play_trick(index)
       @trick_score += 1 if bidding_team_wins_trick?(index)
       rotate_player_order_to_start_with(@tricks[index].winner)
     end
 
-    {
-      winners: bidding_team_wins_hand? ? 'bidders' : 'defenders',
-      points: score_hand
-    }
+    winner = bidding_team_wins_hand? ? 'bidders' : 'defenders'
+    points = score_hand
+    [winner, points]
   end
 
-  def init_hand(going_alone, bidding_team, player_order)
-    @going_alone = going_alone
-    @bidding_team = bidding_team
-    @player_order = player_order
-    @display_order = player_order.dup # Always display trick plays in same order
-    @trick_score = 0
+  def init_hand(going_alone, bidding_team, player_order, tricks)
   end
 
   def play_trick(index)

@@ -9,8 +9,7 @@ class HumanPlayer < Player
     super
   end
 
-  def bid_centre_card(centre_card, joker_suit)
-    puts "Centre card is the Joker - suit is #{SUITS[joker_suit][:glyph]}" if joker_suit
+  def bid_centre_card(centre_card)
     prompt = "Bid - dealer pick up #{centre_card} (1) or pass (2):"
     input = get_upcase_input(prompt, %w[1 2], "Type '1' or '2'")
     return 'pass', false if input == '2'
@@ -89,7 +88,7 @@ class HumanPlayer < Player
     invalid_input_message = "Try again! Options are #{valid_input.join(', ')}" if invalid_input_message.nil?
 
     loop do
-      print "** #{@name} **\n#{prompt}\n>> "
+      print "\n** #{@name} **\n#{prompt}\n>> "
       input = gets.chomp[input_length - 1].upcase
       return input if valid_input.include?(input)
 

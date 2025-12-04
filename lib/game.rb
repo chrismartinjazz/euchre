@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'io/console'
 require_relative 'deck'
 require_relative 'card'
 require_relative 'ranks'
@@ -26,13 +27,12 @@ class Game
 
   def start_game_loop
     loop do
+      $stdout.clear_screen
       rotate_player_order_to_start_with(player_after(@dealer))
       deal
       display_score
-      # TODO: If centre card is a joker - must choose suit before displaying cards.
       display_board
       trumps, bidder, going_alone = bid_for_trumps
-
 
       if trumps.nil?
         @dealer = player_after(@dealer)
@@ -51,14 +51,15 @@ class Game
         bidding_team.include?(player) || defending_team.include?(player)
       end
 
-      @trick_manager = TrickManager.new(trumps)
+      @trick_manager = TrickManager.new(trumps, going_alone, bidding_team, trick_player_order)
 
-      result = @trick_manager.play_hand(going_alone, bidding_team, trick_player_order)
-      if result[:winner] == 'bidders'
-        @score[bidding_team] += result[:points]
+      winner, points = @trick_manager.play_hand
+      if winner == 'bidders'
+        @score[bidding_team] += points
       else
-        @score[defending_team] += result[:points]
+        @score[defending_team] += points
       end
+
       break if game_over?
 
       @dealer = player_after(@dealer)
@@ -80,6 +81,12 @@ class Game
       player.hand = @deck.deal(5)
     end
     @centre_card = @deck.draw_one
+    if @centre_card.suit == :J
+      puts 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.'
+      @centre_card_suit = @dealer.choose_a_suit
+    else
+      @centre_card_suit = @centre_card.suit
+    end
   end
 
   def display_board
@@ -96,28 +103,23 @@ class Game
     puts "#{west_hand}         #{centre_card}           #{east_hand}\n\n"
     puts "                    #{south_hand}"
     puts "Dealer: #{@dealer}"
-    puts "Trumps: #{@trumps}"
-    puts "Bidder: #{@bidder}"
+    puts "Centre Card Suit: #{SUITS[@centre_card_suit][:glyph]}"
   end
 
   # Return the trump as a symbol (:C) and the bidder (player object) or nil if all pass twice.
   def bid_for_trumps
-    # If the centre card is a joker, ask the dealer to nominate a suit and use this suit for first round of bidding.
-    joker_suit = @centre_card.suit == :J ? @dealer.choose_a_suit : nil
-
     @player_order.each do |player|
-      player_bid, going_alone = player.bid_centre_card(@centre_card, joker_suit) # 'pick up' or 'pass'
+      player_bid, going_alone = player.bid_centre_card(@centre_card) # 'pick up' or 'pass'
       next if player_bid == 'pass'
 
-      trumps = joker_suit.nil? ? @centre_card.suit : joker_suit
+      trumps = @centre_card_suit
       @dealer.exchange_card(@centre_card, trumps)
       return trumps, player, going_alone
     end
 
     # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
     available_trumps = %i[C D S H]
-    available_trumps.delete(@centre_card.suit)
-    available_trumps.delete(joker_suit)
+    available_trumps.delete(@centre_card_suit)
 
     @player_order.each do |player|
       player_bid, going_alone = player.bid_trumps(available_trumps)
@@ -143,7 +145,7 @@ class Game
   end
 
   def display_score
-    puts "SCOREBOARD"
+    puts 'SCOREBOARD'
     puts "#{team_names(@team1)}: #{@score[@team1]} points"
     puts "#{team_names(@team2)}: #{@score[@team2]} points"
   end
