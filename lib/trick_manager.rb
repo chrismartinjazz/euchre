@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'constants'
 require_relative 'trick'
-require_relative 'suits'
 
 # Manages the playing of successive tricks, updates player order based on the winner of previous trick,
 # tracks the score, and reports the winning team ('bidders' or 'defenders') and points scored.
@@ -9,7 +9,7 @@ class TrickManager
   HAND_SIZE = 5
   TRICK_SCORES_TO_POINTS = [2, 2, 2, 1, 1, 2].freeze
   BIDDERS_MUST_WIN_N_TRICKS = (HAND_SIZE / 2) + 1
-  SWEEP_BONUS = 2
+  GOING_ALONE_BONUS = 2
   MIN_COL_WIDTH = 7
 
   def initialize(trumps, going_alone, bidding_team, player_order, tricks = nil)
@@ -34,8 +34,7 @@ class TrickManager
     [winner, points]
   end
 
-  def init_hand(going_alone, bidding_team, player_order, tricks)
-  end
+  private
 
   def play_trick(index)
     @player_order.each do |player|
@@ -44,6 +43,8 @@ class TrickManager
       card = player.play_card(@trumps, @tricks, index)
       @tricks[index].add(player, card)
     end
+    display_header
+    display_tricks
   end
 
   def bidding_team_wins_trick?(index)
@@ -60,11 +61,11 @@ class TrickManager
 
   def score_hand
     base_score = TRICK_SCORES_TO_POINTS[@trick_score]
-    bonus = sweep_bonus? ? SWEEP_BONUS : 0
+    bonus = going_alone_bonus ? GOING_ALONG_BONUS : 0
     base_score + bonus
   end
 
-  def sweep_bonus?
+  def going_alone_bonus
     @trick_score == HAND_SIZE && @going_alone
   end
 

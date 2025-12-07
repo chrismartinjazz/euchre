@@ -21,7 +21,7 @@ RSpec.describe HumanPlayer do
     card = deck.draw_one
     it 'successfully exchanges a card' do
       silence do
-        allow(player).to receive(:gets).and_return("1")
+        allow(player).to receive(:gets).and_return('1')
         discarded_card = player.exchange_card(card, nil)
         expect(discarded_card.suit).to eq :C
         expect(discarded_card.rank).to eq :'2'
@@ -30,36 +30,36 @@ RSpec.describe HumanPlayer do
 
     it 'can pass on the centre card' do
       silence do
-        allow(player).to receive(:gets).and_return("2")
-        expect(player.bid_centre_card(card)).to eq :pass
+        allow(player).to receive(:gets).and_return('2', 'N')
+        expect(player.bid_centre_card(card, card.suit, false)).to eq ['pass', false]
       end
     end
 
     it 'can pick up the centre card' do
       silence do
-        allow(player).to receive(:gets).and_return("1")
-        expect(player.bid_centre_card(card)).to eq :pick_up
+        allow(player).to receive(:gets).and_return('1', 'N')
+        expect(player.bid_centre_card(card, card.suit, false)).to eq ['pick up', false]
       end
     end
 
     it 'can pass when bidding trumps' do
       silence do
-        allow(player).to receive(:gets).and_return("P")
-        expect(player.bid_trumps([:C, :D, :H, :S])).to eq :pass
+        allow(player).to receive(:gets).and_return('P', 'N')
+        expect(player.bid_trumps([:C, :D, :H, :S])).to eq ['pass', false]
       end
     end
 
     it 'can bid for a valid suit (clubs)' do
       silence do
-        allow(player).to receive(:gets).and_return("C")
-        expect(player.bid_trumps([:C, :D, :H, :S])).to eq :C
+        allow(player).to receive(:gets).and_return('C', 'N')
+        expect(player.bid_trumps([:C, :D, :H, :S])).to eq [:C, false]
       end
     end
 
     it 're-prompts if player inputs an invalid suit' do
       silence do
-        allow(player).to receive(:gets).and_return("C", "D")
-        expect(player.bid_trumps([:D, :H, :S])).to eq :D
+        allow(player).to receive(:gets).and_return('C', 'D', 'N')
+        expect(player.bid_trumps([:D, :H, :S])).to eq [:D, false]
       end
     end
   end

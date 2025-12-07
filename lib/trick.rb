@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'ranks'
+require_relative 'constants'
 
 # A Trick.
 class Trick
@@ -22,28 +22,32 @@ class Trick
     trick_complete? ? winning_play[:player] : nil
   end
 
-  def winning_play
-    @plays.max_by { |play| play[:rating] }
-  end
-
   def trick_complete?
     @plays.length == @player_count
   end
 
-  def card(player)
-    my_play = @plays.find { |play| play[:player] == player }
-    return my_play[:card] if my_play
+  def winning_play
+    @plays.max_by { |play| play[:rating] }
+  end
 
-    nil
+  def card(player)
+    player_card = @plays.find { |play| play[:player] == player } || {}
+    player_card[:card]
   end
 
   private
 
   def evaluate_card(card)
-    return 0 if card.suit(@trumps) != @trumps && card.suit(@trumps) != @lead_suit
+    suit = card.suit(@trumps)
+    rank = left_bower?(card) ? LEFT_BOWER_RANK : card.rank
 
-    rank = card.rank
-    rank = :left_bower if rank == :J && card.suit != card.suit(@trumps)
-    card.suit(@trumps) == @trumps ? 100 + RANKS[:trumps].find_index(rank) : RANKS[:non_trumps].find_index(rank)
+    # If a card is not trumps and has not followed suit, it cannot win the trick.
+    return 0 if suit != @trumps && suit != @lead_suit
+
+    suit == @trumps ? 100 + RANKS[:trumps].find_index(rank) : RANKS[:non_trumps].find_index(rank)
+  end
+
+  def left_bower?(card)
+    card.rank == BOWER_RANK && card.suit != card.suit(@trumps)
   end
 end

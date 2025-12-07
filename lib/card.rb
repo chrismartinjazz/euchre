@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative 'suits'
+require_relative 'constants'
 
-# A playing card. Expects a suit in format "C/D/H/S/J" where J is Joker.
+# A playing card. Reports its rank and suit, based on the trump suit, accounting for joker and bowers.
 class Card
   attr_reader :rank
 
@@ -12,20 +12,9 @@ class Card
   end
 
   def suit(trumps = nil)
-    # If no suit is specified, return the card's native suit
     return @suit if trumps.nil?
 
-    # If the card is a joker, return the trumps suit
-    return trumps if @suit == :J
-
-    # If the card is a Jack, handle left and right bower
-    if @rank == :J
-      return trumps if red_suit?(trumps) && red_suit?(@suit)
-
-      return trumps if black_suit?(trumps) && black_suit?(@suit)
-    end
-
-    @suit
+    bower?(trumps) || joker? ? trumps : @suit
   end
 
   def to_s
@@ -35,11 +24,11 @@ class Card
 
   private
 
-  def red_suit?(suit)
-    suit == :D || suit == :H
+  def bower?(trumps)
+    @rank == BOWER_RANK && SUITS[@suit][:color] == SUITS[trumps][:color]
   end
 
-  def black_suit?(suit)
-    suit == :C || suit == :S
+  def joker?
+    @suit == JOKER_SUIT
   end
 end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'constants'
 require_relative 'card'
 
 # A deck of cards.
@@ -10,8 +11,6 @@ class Deck
     @ranks = ranks
     @suits = suits
     @joker_count = joker_count
-    @joker_rank = '?'.to_sym
-    @joker_suit = :J
     @cards = create_cards
   end
 
@@ -32,9 +31,11 @@ class Deck
   def create_cards
     cards = []
     @ranks.each do |rank|
-      @suits.each { |suit| cards.push(Card.new(rank, suit)) }
+      @suits.each do |suit|
+        cards.push(Card.new(rank, suit))
+      end
     end
-    @joker_count.times { cards.push(Card.new(@joker_rank, @joker_suit)) }
+    @joker_count.times { cards.push(Card.new(JOKER_RANK, JOKER_SUIT)) }
     cards
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'constants'
 require_relative 'player'
-require_relative 'suits'
 
 # A human player
 class HumanPlayer < Player
@@ -9,7 +9,7 @@ class HumanPlayer < Player
     super
   end
 
-  def bid_centre_card(centre_card)
+  def bid_centre_card(centre_card, _centre_card_suit, _i_am_dealer)
     prompt = "Bid - dealer pick up #{centre_card} (1) or pass (2):"
     input = get_upcase_input(prompt, %w[1 2], "Type '1' or '2'")
     return 'pass', false if input == '2'
@@ -24,7 +24,7 @@ class HumanPlayer < Player
     valid_inputs = available_trumps.map(&:to_s) + ['P']
 
     bid = get_upcase_input(prompt, valid_inputs)
-    return 'pass' if bid == 'P'
+    return 'pass', false if bid == 'P'
 
     [bid.to_sym, going_alone?]
   end
@@ -41,23 +41,22 @@ class HumanPlayer < Player
   end
 
   def play_card(trumps, tricks, trick_index)
-    # Determine the cards that can be played, then choose one of the available cards.
-    current_trick = tricks[trick_index]
-    lead_suit = current_trick.lead_suit
+    valid_card_numbers = find_valid_card_numbers(trumps, tricks, trick_index)
+    prompt = "Choose a card to play (1-#{@hand.length}):\n#{hand_text}\n#{number_options_text(@hand.length)}"
+    chosen_card_number = get_upcase_input(prompt, valid_card_numbers).to_i
+    @hand.delete_at(chosen_card_number - 1)
+  end
+
+  def find_valid_card_numbers(trumps, tricks, trick_index)
+    lead_suit = tricks[trick_index].lead_suit
     can_follow_suit = @hand.any? { |card| card.suit(trumps) == lead_suit }
     valid_hand_indices = []
-
-    # Determine which card indices from the player's hand can be played.
     if can_follow_suit
       @hand.each_with_index { |card, index| valid_hand_indices.push(index) if card.suit(trumps) == lead_suit }
     else
       valid_hand_indices = [*0..(@hand.length - 1)]
     end
-    valid_hand_input = valid_hand_indices.map { |card| (card + 1).to_s}
-
-    prompt = "Choose a card to play (1-#{@hand.length}):\n#{hand_text}\n#{number_options_text(@hand.length)}"
-    index = get_upcase_input(prompt, valid_hand_input, 'Choose a valid card to play.').to_i - 1
-    @hand.delete_at(index)
+    valid_hand_indices.map { |card| (card + 1).to_s}
   end
 
   def hand_text
@@ -73,9 +72,9 @@ class HumanPlayer < Player
   end
 
   def choose_a_suit
-    suit_options = SUITS.except(:J).each_with_object([]) { |(key, value), array| array << "#{key}(#{value[:glyph]}) " }
+    suit_options = SUITS.except(JOKER_SUIT).each_with_object([]) { |(key, value), array| array << "#{key}(#{value[:glyph]}) " }
     prompt = "Choose a suit for the centre card: #{suit_options.join(' ')}"
-    valid_suit_input = SUITS.except(:J).each_with_object([]) { |(key, value), object| object << key.to_s.slice(0) }
+    valid_suit_input = SUITS.except(JOKER_SUIT).each_with_object([]) { |(key, value), object| object << key.to_s.slice(0) }
 
     get_upcase_input(prompt, valid_suit_input).to_sym
   end
