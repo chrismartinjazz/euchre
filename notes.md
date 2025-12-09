@@ -1,12 +1,89 @@
 # Notes
 
+## Overall refactoring and adjustments needed
+
+- [ ] Change throughout to use keyword arguments, make interfaces clearer
+- [ ] Document interfaces
+- [ ] Change so left bower is displayed as j rather than J, and a Card 'knows' if it is the left bower, similar to how it knows it is a diamond with a heart glyph if diamonds are trumps and it is the Jack of Hearts.
+- [ ] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
+- [ ] Refactoring of Game and TrickManager to extract Display, extract Bidding.
+- [ ] Update AI and fine tune, add more personality.
+- [ ] Adjust computer_player_spec.rb so there is no 'pause' from ComputerPlayer during its tests.
+
 ## Classes
 
-Game -> @players(HumanPlayer x 1, ComputerPlayer x 3), @deck(Deck), @score, @dealer, @centre_card
+### Game
 
-## Game
+- Runs the main game loop
+  - updates display
+  - manages the players and teams
+  - deal cards
+  - manage bid for trumps
+- Holds onto HumanPlayer and ComputerPlayer, Deck, TrickManager
+- Adjustments needed:
+  - [ ] Extract display related tasks into DisplayManager
+  - [ ] Make it so ComputerPlayers hands are shown with |** |** |** |** |** as their hand instead of the actual cards.
+  - [ ] Extract bidding into BiddingManager
+  - [ ] Refactor #start_game_loop to reduce method length
 
-### Game Setup
+### Player
+
+- Holds cards in its hands and knows its name
+
+### HumanPlayer
+
+- Inherits from Player class
+- Responds to messages to bid, exchange a card, play a card, choose a suit
+- Uses terminal to get input from player
+
+### ComputerPlayer
+
+- Inherits from Player class
+- Responds to messages to bid, exchange a card, play a card, choose a suit
+- Evaluates cards based on 0-5 numerical value for non-trumps, 6-13 for trumps (Joker is 13, 9 of non-trumps is 0)
+- Evaluates hands based on average of card numerical value, considering trump suit
+- Plays the strongest valid card in every trick context
+- Adjustments needed:
+  - [ ] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
+  - [ ] Add awareness of context influencing playing of cards:
+    - [ ] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
+    - [ ] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
+    - [ ] If hold trumps, and have the option to safely 'short' a suit from own hand, take that option. E.g. hold a single, low-ranked club trump, three low-ranked diamonds and a low-ranked heart. Lead with the low-ranked heart to open the possibility of trumping the second trick.
+  - [ ] Add variability of play style through an "aggression" parameter and a "consistency" parameter. More aggressive or less aggressive in bidding, more or less variable in aggression.
+
+### TrickManager
+
+- Manages a set of 5 tricks and reports the result
+- Knows the trump suit, if the dealer is going alone, the bidding team, the current order of players (based on who won the previous trick), the initial order of players (and displays in that order), the progress of tricks, and the trick score.
+- Plays a hand, which is a series of five tricks.
+- Displays tricks in a table, updated for each card played.
+- Adjustments needed:
+  - [ ] Extract display related tasks into same DisplayManager held by Game
+  - [ ] Clarify private methods
+
+### Trick
+
+- Manages state and messages to do with an individual trick
+- Knows the trump suit and how many players
+- Keeps track of the lead suit and the plays as an array of objects, [{ player:, card:, rating: }, ...]
+- Responds to messages to add a card, report the winner (nil if trick is not complete, or the player of the highest card), tell if the trick is complete, find the winning play (nil if no plays, otherwise the current lead play), and find the card played by a specific player.
+- Evaluates cards with a simple ranking system (deliberately separate to ComputerPlayer evaluation of cards)
+
+### Deck
+
+- Generates card objects, shuffles and draws.
+- Designed to be 'thrown out' and regenerated at the end of each hand.
+- Can either deal (returning an array of cards) or draw one (returning a single card)
+
+### Card
+
+- Knows its rank and suit
+- Reports its suit either exactly as stored (if no trumps argument supplied) or considering trump suit and Euchre rules
+- Includes a two digit string representation of glyph and rank.
+
+## Game Planning
+
+### [x] Game Setup
 
 - Player positions are North, South, East, West - human player is South
 - Set score to 0-0
@@ -14,14 +91,7 @@ Game -> @players(HumanPlayer x 1, ComputerPlayer x 3), @deck(Deck), @score, @dea
 - Set a player to be dealer
 - Start the game loop(dealer)
 
-### Game Loop
-
-Game loop(dealer):
-  Check for a winner: if either team has 11 or more points
-    announce the winners
-    exit the game loop
-  Clear the table
-    Reset all players hands to be empty
+### [x] Game Loop
 
   Deal the cards
     Shuffle the deck
@@ -34,24 +104,24 @@ Game loop(dealer):
       Direct dealer to pick up card
         Dealer picks up centre card and removes a card of his choice (including centre card) from his hand
         Set trump suit based on centre card and bidding player
-        TODO: Bidder chooses and announces if "going alone": set go alone
+        Bidder chooses and announces if "going alone": set go alone
       Pass
     If no suit has been set as trumps:
       Set available suits to be all that are not bidding card suit
       Each player in turn starting with the player after dealer can either:
         Nominate a suit to be trumps
           Set trump suit and bidding player
-          TODO: Bidder chooses and announces if "going alone": set go alone
+          Bidder chooses and announces if "going alone": set go alone
         Pass
   If a trump suit has been set:
+    If the bidder is going alone:
+      Remove their partner from the hand
     Play the hand (trumps, bidding player, go alone), update hand result
     Increment score based on hand result
   Next player after dealer becomes dealer
 
   Play the hand (trump suit, bidding player, go alone):
     Initialize the hand result to 0
-    TODO: If the bidder is going alone:
-      TODO: Remove their partner from the hand
     Start player is player after the dealer
     Set bidding team hand score to 0
     5 times:
@@ -67,5 +137,11 @@ Game loop(dealer):
       5 and "go alone":     4, bidders
       5 and not "go alone": 2, bidders
       3, 4:                 1, bidders
-      1, 2:                 2, defenders
-      0:                    4 defenders
+      0, 1, 2:              2, defenders
+  
+  Game loop(dealer):
+  Check for an overall winner: if either team has 11 or more points
+    announce the winners
+    exit the game loop
+  Clear the table
+    Reset all players hands to be empty
