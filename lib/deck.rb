@@ -7,7 +7,7 @@ require_relative 'card'
 class Deck
   attr_reader :cards
 
-  def initialize(ranks: %i[2 3 4 5 6 7 8 9 T J Q K A], suits: %i[C D H S], joker_count: 0)
+  def initialize(ranks: %i[2 3 4 5 6 7 8 9 T J Q K A], suits: [CLUBS, DIAMONDS, HEARTS, SPADES], joker_count: 0)
     @ranks = ranks
     @suits = suits
     @joker_count = joker_count
@@ -35,7 +35,7 @@ class Deck
         cards.push(Card.new(rank: rank, suit: suit))
       end
     end
-    @joker_count.times { cards.push(Card.new(rank: JOKER_RANK, suit: JOKER_SUIT)) }
+    @joker_count.times { cards.push(Card.new(rank: JOKER, suit: JOKER_SUIT)) }
     cards
   end
 end

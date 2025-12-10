@@ -97,13 +97,9 @@ class ComputerPlayer < Player
 
   def evaluate_card(card, trumps)
     suit = card.suit(trumps: trumps)
-    rank = left_bower?(card, trumps) ? LEFT_BOWER_RANK : card.rank
+    rank = card.rank(trumps: trumps)
 
     suit == trumps ? 6 + RANKS[:trumps].find_index(rank) : RANKS[:non_trumps].find_index(rank)
-  end
-
-  def left_bower?(card, trumps)
-    card.rank == BOWER_RANK && card.suit != card.suit(trumps: trumps)
   end
 
   def announce(input)

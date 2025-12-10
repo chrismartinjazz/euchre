@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'constants'
 require 'trick_manager'
 require 'human_player'
 require 'card'
@@ -13,7 +14,7 @@ RSpec.describe TrickManager do
 
     it 'initializes with no winner or points' do
       tricks = TrickManager.new(
-        trumps: :C,
+        trumps: CLUBS,
         going_alone: false,
         bidding_team: [north, south],
         player_order: [south, west, north, east]

@@ -39,15 +39,11 @@ class Trick
 
   def evaluate_card(card)
     suit = card.suit(trumps: @trumps)
-    rank = left_bower?(card) ? LEFT_BOWER_RANK : card.rank
+    rank = card.rank(trumps: @trumps)
 
     # If a card is not trumps and has not followed suit, it cannot win the trick.
     return 0 if suit != @trumps && suit != @lead_suit
 
     suit == @trumps ? 100 + RANKS[:trumps].find_index(rank) : RANKS[:non_trumps].find_index(rank)
-  end
-
-  def left_bower?(card)
-    card.rank == BOWER_RANK && card.suit != card.suit(trumps: @trumps)
   end
 end

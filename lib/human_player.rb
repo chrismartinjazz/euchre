@@ -51,8 +51,8 @@ class HumanPlayer < Player
       array << "#{key}(#{value[:glyph]}) "
     end
     prompt = "Choose a suit for the centre card: #{suit_options.join(' ')}"
-    valid_suit_input = SUITS.except(JOKER_SUIT).each_with_object([]) do |(key, _value), object|
-      object << key.to_s.slice(0)
+    valid_suit_input = SUITS.except(JOKER_SUIT).each_with_object([]) do |(key, _value), array|
+      array << key.to_s.slice(0)
     end
 
     input = get_upcase_input(prompt, valid_suit_input)

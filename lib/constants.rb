@@ -1,39 +1,48 @@
 # frozen_string_literal: true
 
+# Computer AI
 DISPLAY_THINKING = true
 THINKING_TIME = 0
 
-BOWER_RANK = :J
-LEFT_BOWER_RANK = :left_bower
-JOKER_RANK = :'?'
+# Ranks
+NINE = :'9'
+TEN = :T
+JACK = :J
+QUEEN = :Q
+KING = :K
+ACE = :A
+LEFT_BOWER = :j
+JOKER = :'?'
+
 RANKS = {
-  non_trumps: (%i[9 T] + [BOWER_RANK] + %i[Q K A]).freeze,
-  trumps: (%i[9 T Q K A] + [LEFT_BOWER_RANK, BOWER_RANK, JOKER_RANK]).freeze
+  non_trumps: [NINE, TEN, JACK, QUEEN, KING, ACE].freeze,
+  trumps: [NINE, TEN, QUEEN, KING, ACE, LEFT_BOWER, JACK, JOKER].freeze
 }.freeze
 
-CLUB_SUIT = :C
-DIAMOND_SUIT = :D
-HEART_SUIT = :H
-SPADE_SUIT = :S
+# Suits
+CLUBS = :C
+DIAMONDS = :D
+HEARTS = :H
+SPADES = :S
 JOKER_SUIT = :J
 
 SUITS = {
-  CLUB_SUIT => {
+  CLUBS => {
     text: 'Clubs',
     glyph: '♣',
     color: 'black'
   },
-  DIAMOND_SUIT => {
+  DIAMONDS => {
     text: 'Diamonds',
     glyph: "\e[31m♦\e[0m",
     color: 'red'
   },
-  HEART_SUIT => {
+  HEARTS => {
     text: 'Hearts',
     glyph: "\e[31m♥\e[0m",
     color: 'red'
   },
-  SPADE_SUIT => {
+  SPADES => {
     text: 'Spades',
     glyph: '♠',
     color: 'black'

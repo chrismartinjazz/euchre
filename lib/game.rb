@@ -127,7 +127,7 @@ class Game
     gets
   end
 
-  # Return the bidded trump suit as a symbol (:C) and the bidder (player object) or nil if all pass twice.
+  # Return the bidded trump suit and the bidder (player object) or nil if all pass twice.
   def bid_for_trumps
     @player_order.each do |player|
       response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
@@ -141,12 +141,12 @@ class Game
     end
 
     # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
-    puts "#{@dealer}: I turns it down."
+    puts "#{@dealer}: I turn it down."
     available_trumps = SUITS.keys.reject { |suit| [JOKER_SUIT, @centre_card_suit].include?(suit) }
 
     @player_order.each do |player|
       response = player.bid_trumps(options: available_trumps)
-      next if response[:bid] == 'pass'
+      next if response[:bid] == :pass
 
       trumps = response[:bid]
       going_alone = response[:going_alone]
