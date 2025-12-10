@@ -32,16 +32,16 @@ class HumanPlayer < Player
     {bid: bid, going_alone: going_alone}
   end
 
-  def exchange_card(card:, **_keyword_args)
+  def exchange_card(card:, trumps:, **_keyword_args)
     @hand.push(card)
-    prompt = "Choose a card to discard (1-6):\n#{hand_text}\n#{number_options_text(6)}"
+    prompt = "Choose a card to discard (1-6):\n#{hand_text(trumps)}\n#{number_options_text(6)}"
     index = get_upcase_input(prompt, %w[1 2 3 4 5 6], 'Enter a number from 1 to 6.').to_i - 1
     @hand.delete_at(index)
   end
 
   def play_card(trumps:, tricks:, trick_index:)
     valid_card_numbers = find_valid_card_numbers(trumps, tricks, trick_index)
-    prompt = "Choose a card to play (1-#{@hand.length}):\n#{hand_text}\n#{number_options_text(@hand.length)}"
+    prompt = "Choose a card to play (1-#{@hand.length}):\n#{hand_text(trumps)}\n#{number_options_text(@hand.length)}"
     chosen_card_number = get_upcase_input(prompt, valid_card_numbers).to_i
     @hand.delete_at(chosen_card_number - 1)
   end
@@ -77,8 +77,8 @@ class HumanPlayer < Player
     valid_hand_indices.map { |card| (card + 1).to_s }
   end
 
-  def hand_text
-    "|#{@hand.join(' |')}"
+  def hand_text(trumps)
+    "|#{@hand.map { |card| card.to_s(trumps: trumps) }.join(' |')}"
   end
 
   def number_options_text(max)

@@ -23,7 +23,7 @@ RSpec.describe HumanPlayer do
     it 'successfully exchanges a card' do
       silence do
         allow(player).to receive(:gets).and_return('1')
-        discarded_card = player.exchange_card(card: card)
+        discarded_card = player.exchange_card(card: card, trumps: CLUBS)
         expect(discarded_card.suit).to eq CLUBS
         expect(discarded_card.rank).to eq :'2'
       end

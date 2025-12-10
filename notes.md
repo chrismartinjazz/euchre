@@ -7,9 +7,10 @@
 - [x] Change so left bower 'knows' if it is the left bower, similar to how it knows it is a diamond with a heart glyph if diamonds are trumps and it is the Jack of Hearts.
 - [x] Fix bug where pressing enter on blank input crashes the game
 - [x] Left bower displayed as 'j' in tricks table
-- [ ] Left bower displayed as 'j' in player hand (when playing a card, not when bidding)
+- [x] Left bower displayed as 'j' in player hand (when playing a card, not when bidding)
+- [ ] Refactoring of Game and TrickManager to extract Display
+- [ ] Extract BiddingManager from Game
 - [ ] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
-- [ ] Refactoring of Game and TrickManager to extract Display, extract Bidding.
 - [ ] Refactoring of ComputerPlayer to clean up method length
 - [ ] Update AI and fine tune, add more personality.
 
