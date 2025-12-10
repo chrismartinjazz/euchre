@@ -122,7 +122,7 @@ class TrickManager
   def generate_cards_for_trick_row(trick, col_width)
     cards = ''
     @display_order.each do |player|
-      player_card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s
+      player_card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: @trumps)
       winning_card_indication = trick.winning_play && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
       padding = ' ' * (col_width - 6)
 

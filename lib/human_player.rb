@@ -99,7 +99,7 @@ class HumanPlayer < Player
 
     loop do
       print "\n** #{@name} **\n#{prompt}\n>> "
-      input = gets.chomp[0].upcase
+      input = gets.chomp[0]&.upcase
       return input if normalized_valid_input.include?(input)
 
       puts invalid_input_message
