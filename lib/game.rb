@@ -43,8 +43,15 @@ class Game
       bidding_team, defending_team = set_teams(bidder, going_alone)
       trick_player_order = set_trick_player_order(bidding_team, defending_team)
 
-      trick_manager = TrickManager.new(trumps, going_alone, bidding_team, trick_player_order)
-      winner, points = trick_manager.play_hand
+      trick_manager = TrickManager.new(
+        trumps: trumps,
+        going_alone: going_alone,
+        bidding_team: bidding_team,
+        player_order: trick_player_order
+      )
+      trick_manager.play_hand
+      winner = trick_manager.winner
+      points = trick_manager.points
       winning_team = winner == 'bidders' ? bidding_team : defending_team
       @score[winning_team] += points
       display_hand_result(winning_team, points)
@@ -75,7 +82,7 @@ class Game
     @deck = Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
     @deck.shuffle
     @player_order.each(&:reset_hand)
-    @player_order.each { |player| player.hand = @deck.deal(5) }
+    @player_order.each { |player| player.hand = @deck.deal(count: 5) }
     @centre_card = @deck.draw_one
     @centre_card_suit = @centre_card.suit == JOKER_SUIT ? handle_centre_card_is_joker : @centre_card.suit
   end
@@ -120,15 +127,16 @@ class Game
     gets
   end
 
-  # Return the trump as a symbol (:C) and the bidder (player object) or nil if all pass twice.
+  # Return the bidded trump suit as a symbol (:C) and the bidder (player object) or nil if all pass twice.
   def bid_for_trumps
     @player_order.each do |player|
-      player_is_dealer = player == @dealer
-      player_bid, going_alone = player.bid_centre_card(@centre_card, @centre_card_suit, player_is_dealer) # 'pick up' or 'pass'
-      next if player_bid == 'pass'
+      response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
+      next if response[:bid] == :pass
 
-      trumps = @centre_card_suit
-      @dealer.exchange_card(@centre_card, trumps)
+      trumps = response[:bid]
+      going_alone = response[:going_alone]
+
+      @dealer.exchange_card(card: @centre_card, trumps: trumps)
       return trumps, player, going_alone
     end
 
@@ -137,10 +145,12 @@ class Game
     available_trumps = SUITS.keys.reject { |suit| [JOKER_SUIT, @centre_card_suit].include?(suit) }
 
     @player_order.each do |player|
-      player_bid, going_alone = player.bid_trumps(available_trumps)
-      next if player_bid == 'pass'
+      response = player.bid_trumps(options: available_trumps)
+      next if response[:bid] == 'pass'
 
-      trumps = player_bid
+      trumps = response[:bid]
+      going_alone = response[:going_alone]
+
       return trumps, player, going_alone
     end
 

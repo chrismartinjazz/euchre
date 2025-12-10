@@ -9,10 +9,20 @@ RSpec.describe Deck do
   end
 end
 
+RSpec.describe Deck do
+  it 'shuffles the deck' do
+    deck = Deck.new()
+    initial_cards = deck.cards.dup
+    deck.shuffle
+    shuffled_cards = deck.cards
+    expect(initial_cards != shuffled_cards).to be true
+  end
+end
+
 RSpec.describe Deck, "#deal" do
   it 'deals cards into an array of cards, removing them from the deck' do
     deck = Deck.new()
-    hand = deck.deal(5)
+    hand = deck.deal(count: 5)
     expect(hand.instance_of?(Array)).to be true
     expect(hand.length).to eq 5
     expect(deck.cards.length).to eq 47

@@ -6,15 +6,15 @@ require_relative 'constants'
 class Trick
   attr_reader :plays, :lead_suit
 
-  def initialize(trumps, player_count = 4)
+  def initialize(trumps:, player_count: 4)
     @trumps = trumps
     @lead_suit = nil
     @plays = []
     @player_count = player_count
   end
 
-  def add(player, card)
-    @lead_suit = card.suit(@trumps) if @lead_suit.nil?
+  def add(player:, card:)
+    @lead_suit = card.suit(trumps: @trumps) if @lead_suit.nil?
     @plays.push({ player: player, card: card, rating: evaluate_card(card) })
   end
 
@@ -30,7 +30,7 @@ class Trick
     @plays.max_by { |play| play[:rating] }
   end
 
-  def card(player)
+  def card(player:)
     player_card = @plays.find { |play| play[:player] == player } || {}
     player_card[:card]
   end
@@ -38,7 +38,7 @@ class Trick
   private
 
   def evaluate_card(card)
-    suit = card.suit(@trumps)
+    suit = card.suit(trumps: @trumps)
     rank = left_bower?(card) ? LEFT_BOWER_RANK : card.rank
 
     # If a card is not trumps and has not followed suit, it cannot win the trick.
@@ -48,6 +48,6 @@ class Trick
   end
 
   def left_bower?(card)
-    card.rank == BOWER_RANK && card.suit != card.suit(@trumps)
+    card.rank == BOWER_RANK && card.suit != card.suit(trumps: @trumps)
   end
 end

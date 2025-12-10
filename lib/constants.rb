@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+DISPLAY_THINKING = true
+THINKING_TIME = 0
+
 BOWER_RANK = :J
 LEFT_BOWER_RANK = :left_bower
 JOKER_RANK = :'?'

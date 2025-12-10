@@ -2,11 +2,12 @@
 
 ## Overall refactoring and adjustments needed
 
-- [ ] Change throughout to use keyword arguments, make interfaces clearer
+- [ ] Change throughout to use keyword arguments for interfaces, make interfaces clearer
 - [ ] Document interfaces
 - [ ] Change so left bower is displayed as j rather than J, and a Card 'knows' if it is the left bower, similar to how it knows it is a diamond with a heart glyph if diamonds are trumps and it is the Jack of Hearts.
 - [ ] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
 - [ ] Refactoring of Game and TrickManager to extract Display, extract Bidding.
+- [ ] Refactoring of ComputerPlayer to clean up method length
 - [ ] Update AI and fine tune, add more personality.
 - [ ] Adjust computer_player_spec.rb so there is no 'pause' from ComputerPlayer during its tests.
 
@@ -22,7 +23,7 @@
 - Holds onto HumanPlayer and ComputerPlayer, Deck, TrickManager
 - Adjustments needed:
   - [ ] Extract display related tasks into DisplayManager
-  - [ ] Make it so ComputerPlayers hands are shown with |** |** |** |** |** as their hand instead of the actual cards.
+  - [ ] Make it so ComputerPlayers hands are shown with |## |## |## |## |## as their hand instead of the actual cards.
   - [ ] Extract bidding into BiddingManager
   - [ ] Refactor #start_game_loop to reduce method length
 
@@ -46,6 +47,7 @@
 - Adjustments needed:
   - [ ] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
   - [ ] Add awareness of context influencing playing of cards:
+    - [ ] If the strongest card in hand can't win the trick, play the weakest valid card instead
     - [ ] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
     - [ ] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
     - [ ] If hold trumps, and have the option to safely 'short' a suit from own hand, take that option. E.g. hold a single, low-ranked club trump, three low-ranked diamonds and a low-ranked heart. Lead with the low-ranked heart to open the possibility of trumping the second trick.

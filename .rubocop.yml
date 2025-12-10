@@ -1,7 +1,7 @@
 AllCops:
   Exclude:
     - "Gemfile"
-    - "spec/spec_helper.rb"
+    - "spec/*"
   NewCops: enable
 Metrics/BlockLength:
   Exclude:

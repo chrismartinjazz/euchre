@@ -17,4 +17,21 @@ class Player
   def to_s
     @name
   end
+
+  # Methods that must be implemented by subclasses
+  def bid_centre_card(**_keyword_args)
+    raise NotImplementedError
+  end
+
+  def bid_trumps(**_keyword_args)
+    raise NotImplementedError
+  end
+
+  def exchange_card(**_keyword_args)
+    raise NotImplementedError
+  end
+
+  def choose_a_suit(**_keyword_args)
+    raise NotImplementedError
+  end
 end

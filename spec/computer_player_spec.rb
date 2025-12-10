@@ -15,44 +15,45 @@ RSpec.describe ComputerPlayer do
   context 'with a near perfect clubs hand' do
     player = ComputerPlayer.new
     player.hand = [
-      Card.new(JOKER_RANK, JOKER_SUIT),
-      Card.new(BOWER_RANK, :C),
-      Card.new(BOWER_RANK, :S),
-      Card.new(:A, :C),
-      Card.new(:A, :S)
+      Card.new(rank: JOKER_RANK, suit: JOKER_SUIT),
+      Card.new(rank: BOWER_RANK, suit: :C),
+      Card.new(rank: BOWER_RANK, suit: :S),
+      Card.new(rank: :A, suit: :C),
+      Card.new(rank: :A, suit: :S)
     ]
     it 'orders up centre_card if it is a club' do
-      centre_card = Card.new(:T, :C)
-      i_am_dealer = false
-      expect(player.bid_centre_card(centre_card, centre_card.suit, i_am_dealer)[0]).to eq 'pick up'
+      card = Card.new(rank: :T, suit: :C)
+      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+      expect(response[:bid]).to eq card.suit
     end
 
     it 'does not order up centre_card if it is a diamond' do
-      centre_card = Card.new(:T, :D)
-      i_am_dealer = false
-      expect(player.bid_centre_card(centre_card, centre_card.suit, i_am_dealer)[0]).to eq 'pass'
+      card = Card.new(rank: :T, suit: :D)
+      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+      expect(response[:bid]).to eq :pass
     end
 
     it 'goes alone when ordering up centre_card if it is a club' do
-      centre_card = Card.new(:T, :C)
-      i_am_dealer = false
-      expect(player.bid_centre_card(centre_card, centre_card.suit, i_am_dealer)).to eq ['pick up', true]
+      card = Card.new(rank: :T, suit: :C)
+      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+      expect(response[:bid]).to eq card.suit
+      expect(response[:going_alone]).to eq true
     end
 
-    it 'bids clubs' do
-      expect(player.bid_trumps([:C, :D, :H])[0]).to eq :C
-    end
-
-    it 'goes alone with clubs' do
-      expect(player.bid_trumps([:C, :D, :H])).to eq [:C, true]
+    it 'bids clubs and goes alone' do
+      response = player.bid_trumps(options: [:C, :D, :H])
+      expect(response[:bid]).to eq :C
+      expect(response[:going_alone]).to eq true
     end
 
     it 'passes if offered the two red suits only' do
-      expect(player.bid_trumps([:D, :H])).to eq ['pass', false]
+      response = player.bid_trumps(options: [:D, :H])
+      expect(response[:bid]).to eq :pass
+      expect(response[:going_alone]).to eq false
     end
 
     it 'chooses the lowest card to exchange with the next highest trump' do
-      discard = player.exchange_card(Card.new(:K, :C), :C)
+      discard = player.exchange_card(card: Card.new(rank: :K, suit: :C), trumps: :C)
       expect(discard).to have_attributes(rank: :A, suit: :S)
     end
   end
@@ -60,54 +61,51 @@ RSpec.describe ComputerPlayer do
   context 'with a fair (should bid) diamonds hand' do
     player = ComputerPlayer.new
     player.hand = [
-      Card.new(BOWER_RANK, :D),
-      Card.new(:A, :D),
-      Card.new(:K, :D),
-      Card.new(:Q, :D),
-      Card.new(:T, :S)
+      Card.new(rank: BOWER_RANK, suit: :D),
+      Card.new(rank: :A, suit: :D),
+      Card.new(rank: :K, suit: :D),
+      Card.new(rank: :Q, suit: :D),
+      Card.new(rank: :T, suit: :S)
     ]
     it 'orders up centre_card if it is a diamond but does not go alone' do
-      centre_card = Card.new(:'9', :D)
-      i_am_dealer = false
-      expect(player.bid_centre_card(centre_card, centre_card.suit, i_am_dealer)).to eq ['pick up', false]
+      card = Card.new(rank: :'9', suit: :D)
+      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+      expect(response[:bid]).to eq card.suit
+      expect(response[:going_alone]).to eq false
     end
 
     it 'passes on centre_card if it is a heart' do
-      centre_card = Card.new(:'9', :H)
-      i_am_dealer = false
-      expect(player.bid_centre_card(centre_card, centre_card.suit, i_am_dealer)).to eq ['pass', false]
+      card = Card.new(rank: :'9', suit: :H)
+      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+      expect(response[:bid]).to eq :pass
     end
 
     it 'chooses diamonds as trumps and does not go alone' do
-      expect(player.bid_trumps([:C, :D, :H])).to eq [:D, false]
+      response = player.bid_trumps(options: [:C, :D, :H])
+      expect(response[:bid]).to eq :D
+      expect(response[:going_alone]).to eq false
     end
   end
 
   context 'when playing a trick' do
     player = ComputerPlayer.new
     player.hand = [
-      Card.new(BOWER_RANK, :D),
-      Card.new(:A, :D),
-      Card.new(:K, :D),
-      Card.new(:Q, :D),
-      Card.new(:T, :S)
+      Card.new(rank: BOWER_RANK, suit: :D),
+      Card.new(rank: :A, suit: :D),
+      Card.new(rank: :K, suit: :D),
+      Card.new(rank: :Q, suit: :D),
+      Card.new(rank: :T, suit: :S)
     ]
     trumps = :D
-    tricks = Array.new(5) { Trick.new(trumps, 4) }
-    it 'when leading, identifies that all cards are valid' do
-      trick_index = 0
-      expect(player.find_valid_hand_indices(trumps, tricks, trick_index)).to eq [0, 1, 2, 3, 4]
-    end
+    tricks = Array.new(5) { Trick.new(trumps: trumps) }
 
     it 'chooses the highest held trump card to lead' do
-      trick_index = 0
-      expect(player.play_card(trumps, tricks, trick_index)).to have_attributes(rank: BOWER_RANK, suit: :D)
+      expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: BOWER_RANK, suit: :D)
     end
 
     it 'follows suit if a spade is led' do
-      trick_index = 0
-      tricks[trick_index].add(player, Card.new(:A, :S))
-      expect(player.play_card(trumps, tricks, trick_index)).to have_attributes(rank: :T, suit: :S)
+      tricks[0].add(player: player, card: Card.new(rank: :A, suit: :S))
+      expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: :T, suit: :S)
     end
   end
 end

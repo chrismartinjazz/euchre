@@ -12,14 +12,19 @@ class TrickManager
   GOING_ALONE_BONUS = 2
   MIN_COL_WIDTH = 7
 
-  def initialize(trumps, going_alone, bidding_team, player_order, tricks = nil)
+  attr_reader :winner, :points
+
+  def initialize(trumps:, going_alone:, bidding_team:, player_order:)
     @trumps = trumps
     @going_alone = going_alone
     @bidding_team = bidding_team
     @player_order = player_order
-    @tricks = tricks.nil? ? Array.new(HAND_SIZE) { Trick.new(@trumps, @player_order.length) } : tricks
-    @display_order = player_order.dup # Always display trick plays in same order
+
+    @display_order = player_order.dup
+    @tricks = Array.new(HAND_SIZE) { Trick.new(trumps: @trumps, player_count: @player_order.length) }
     @trick_score = 0
+    @winner = nil
+    @points = nil
   end
 
   def play_hand
@@ -29,9 +34,8 @@ class TrickManager
       rotate_player_order_to_start_with(@tricks[index].winner)
     end
 
-    winner = bidding_team_wins_hand? ? 'bidders' : 'defenders'
-    points = score_hand
-    [winner, points]
+    @winner = bidding_team_wins_hand? ? 'bidders' : 'defenders'
+    @points = score_hand
   end
 
   private
@@ -40,8 +44,8 @@ class TrickManager
     @player_order.each do |player|
       display_header
       display_tricks
-      card = player.play_card(@trumps, @tricks, index)
-      @tricks[index].add(player, card)
+      card = player.play_card(trumps: @trumps, tricks: @tricks, trick_index: index)
+      @tricks[index].add(player: player, card: card)
     end
     display_header
     display_tricks
@@ -118,8 +122,8 @@ class TrickManager
   def generate_cards_for_trick_row(trick, col_width)
     cards = ''
     @display_order.each do |player|
-      player_card = trick.card(player).nil? ? '  ' : trick.card(player).to_s
-      winning_card_indication = trick.winning_play && trick.winning_play[:card] == trick.card(player) ? ' *' : '  '
+      player_card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s
+      winning_card_indication = trick.winning_play && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
       padding = ' ' * (col_width - 6)
 
       cards += "#{player_card}#{winning_card_indication}#{padding}| "

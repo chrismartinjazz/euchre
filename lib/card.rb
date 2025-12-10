@@ -6,15 +6,15 @@ require_relative 'constants'
 class Card
   attr_reader :rank
 
-  def initialize(rank, suit)
+  def initialize(rank:, suit:)
     @rank = rank.to_s.upcase.to_sym
     @suit = suit.to_s.upcase.to_sym
   end
 
-  def suit(trumps = nil)
+  def suit(trumps: nil)
     return @suit if trumps.nil?
 
-    bower?(trumps) || joker? ? trumps : @suit
+    bower?(trumps: trumps) || joker? ? trumps : @suit
   end
 
   def to_s
@@ -24,7 +24,7 @@ class Card
 
   private
 
-  def bower?(trumps)
+  def bower?(trumps:)
     @rank == BOWER_RANK && SUITS[@suit][:color] == SUITS[trumps][:color]
   end
 

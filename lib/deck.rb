@@ -18,7 +18,7 @@ class Deck
     @cards.shuffle!
   end
 
-  def deal(count)
+  def deal(count:)
     @cards.shift(count) if @cards.length >= count
   end
 
@@ -32,10 +32,10 @@ class Deck
     cards = []
     @ranks.each do |rank|
       @suits.each do |suit|
-        cards.push(Card.new(rank, suit))
+        cards.push(Card.new(rank: rank, suit: suit))
       end
     end
-    @joker_count.times { cards.push(Card.new(JOKER_RANK, JOKER_SUIT)) }
+    @joker_count.times { cards.push(Card.new(rank: JOKER_RANK, suit: JOKER_SUIT)) }
     cards
   end
 end
