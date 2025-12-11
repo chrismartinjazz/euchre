@@ -25,7 +25,7 @@ RSpec.describe Trick do
       king_of_diamonds = Card.new(rank: KING, suit: DIAMONDS)
       nine_of_diamonds = Card.new(rank: NINE, suit: DIAMONDS)
       ace_of_spades = Card.new(rank: ACE, suit: SPADES)
-      trumps = :C
+      trumps = CLUBS
 
       trick = Trick.new(trumps: trumps)
       trick.add(player: south, card: ten_of_diamonds)

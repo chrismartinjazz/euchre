@@ -14,13 +14,13 @@ class TrickManager
 
   attr_reader :winner, :points
 
-  def initialize(trumps:, going_alone:, bidding_team:, player_order:)
+  def initialize(display:, trumps:, going_alone:, bidding_team:, player_order:)
+    @display = display
     @trumps = trumps
     @going_alone = going_alone
     @bidding_team = bidding_team
     @player_order = player_order
 
-    @display_order = player_order.dup
     @tricks = Array.new(HAND_SIZE) { Trick.new(trumps: @trumps, player_count: @player_order.length) }
     @trick_score = 0
     @winner = nil
@@ -42,13 +42,11 @@ class TrickManager
 
   def play_trick(index)
     @player_order.each do |player|
-      display_header
-      display_tricks
+      @display.tricks(trumps: @trumps, tricks: @tricks, bidding_team: @bidding_team)
       card = player.play_card(trumps: @trumps, tricks: @tricks, trick_index: index)
       @tricks[index].add(player: player, card: card)
     end
-    display_header
-    display_tricks
+    @display.tricks(trumps: @trumps, tricks: @tricks, bidding_team: @bidding_team)
   end
 
   def bidding_team_wins_trick?(index)
@@ -71,63 +69,5 @@ class TrickManager
 
   def going_alone_bonus
     @trick_score == HAND_SIZE && @going_alone
-  end
-
-  def display_header
-    bidding_team_string = @bidding_team.map(&:to_s).join(' ')
-    puts "Bidders: #{bidding_team_string} ... Tricks: #{@trick_score}"
-  end
-
-  def display_tricks
-    col_width = calculate_col_width
-    header = generate_trick_table_header(col_width)
-    table = generate_trick_table(col_width)
-
-    puts header
-    puts table
-  end
-
-  def calculate_col_width
-    max_player_name_length = @display_order.max_by { |player| player.to_s.length }.to_s.length
-    [max_player_name_length + 3, MIN_COL_WIDTH].max
-  end
-
-  def generate_trick_table_header(col_width)
-    header = "#{SUITS[@trumps][:glyph]}    "
-    @display_order.each do |player|
-      header += player.name
-      header += ' ' * (col_width - player.name.length)
-    end
-    header += 'Winner'
-    header
-  end
-
-  def generate_trick_table(col_width)
-    table = ''
-    @tricks.each_with_index do |trick, index|
-      table += generate_trick_row(trick, index, col_width)
-    end
-    table
-  end
-
-  def generate_trick_row(trick, index, col_width)
-    number = index + 1
-    lead_suit_glyph = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
-    cards = generate_cards_for_trick_row(trick, col_width)
-    winner = trick.winner ? trick.winner.to_s : ''
-
-    "#{number}:#{lead_suit_glyph}| #{cards}#{winner}\n"
-  end
-
-  def generate_cards_for_trick_row(trick, col_width)
-    cards = ''
-    @display_order.each do |player|
-      player_card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: @trumps)
-      winning_card_indication = trick.winning_play && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
-      padding = ' ' * (col_width - 6)
-
-      cards += "#{player_card}#{winning_card_indication}#{padding}| "
-    end
-    cards
   end
 end

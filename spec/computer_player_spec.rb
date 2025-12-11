@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 require 'constants'
+require 'helpers'
 require 'computer_player'
 require 'card'
 require 'trick'
+
+# TODO: This would be better as a parameter to the ComputerPlayer object on initialization
+THINKING_TIME = 0
 
 RSpec.describe ComputerPlayer do
   it 'chooses a random suit' do
@@ -23,38 +27,50 @@ RSpec.describe ComputerPlayer do
     ]
     it 'orders up centre_card if it is a club' do
       card = Card.new(rank: TEN, suit: CLUBS)
-      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
-      expect(response[:bid]).to eq card.suit
+      silence do
+        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        expect(response[:bid]).to eq card.suit
+      end
     end
 
     it 'does not order up centre_card if it is a diamond' do
       card = Card.new(rank: TEN, suit: DIAMONDS)
-      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
-      expect(response[:bid]).to eq :pass
+      silence do
+        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        expect(response[:bid]).to eq :pass
+      end
     end
 
     it 'goes alone when ordering up centre_card if it is a club' do
       card = Card.new(rank: TEN, suit: CLUBS)
-      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
-      expect(response[:bid]).to eq card.suit
-      expect(response[:going_alone]).to eq true
+      silence do
+        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        expect(response[:bid]).to eq card.suit
+        expect(response[:going_alone]).to eq true
+      end
     end
 
     it 'bids clubs and goes alone' do
-      response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
-      expect(response[:bid]).to eq CLUBS
-      expect(response[:going_alone]).to eq true
+      silence do
+        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
+        expect(response[:bid]).to eq CLUBS
+        expect(response[:going_alone]).to eq true
+      end
     end
 
     it 'passes if offered the two red suits only' do
-      response = player.bid_trumps(options: [DIAMONDS, HEARTS])
-      expect(response[:bid]).to eq :pass
-      expect(response[:going_alone]).to eq false
+      silence do
+        response = player.bid_trumps(options: [DIAMONDS, HEARTS])
+        expect(response[:bid]).to eq :pass
+        expect(response[:going_alone]).to eq false
+      end
     end
 
     it 'chooses the lowest card to exchange with the next highest trump' do
-      discard = player.exchange_card(card: Card.new(rank: KING, suit: CLUBS), trumps: CLUBS)
-      expect(discard).to have_attributes(rank: ACE, suit: SPADES)
+      silence do
+        discard = player.exchange_card(card: Card.new(rank: KING, suit: CLUBS), trumps: CLUBS)
+        expect(discard).to have_attributes(rank: ACE, suit: SPADES)
+      end
     end
   end
 
@@ -69,21 +85,27 @@ RSpec.describe ComputerPlayer do
     ]
     it 'orders up centre_card if it is a diamond but does not go alone' do
       card = Card.new(rank: NINE, suit: DIAMONDS)
-      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
-      expect(response[:bid]).to eq card.suit
-      expect(response[:going_alone]).to eq false
+      silence do
+        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        expect(response[:bid]).to eq card.suit
+        expect(response[:going_alone]).to eq false
+      end
     end
 
     it 'passes on centre_card if it is a heart' do
       card = Card.new(rank: NINE, suit: HEARTS)
-      response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
-      expect(response[:bid]).to eq :pass
+      silence do
+        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        expect(response[:bid]).to eq :pass
+      end
     end
 
     it 'chooses diamonds as trumps and does not go alone' do
-      response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
-      expect(response[:bid]).to eq DIAMONDS
-      expect(response[:going_alone]).to eq false
+      silence do
+        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
+        expect(response[:bid]).to eq DIAMONDS
+        expect(response[:going_alone]).to eq false
+      end
     end
   end
 
@@ -100,12 +122,16 @@ RSpec.describe ComputerPlayer do
     tricks = Array.new(5) { Trick.new(trumps: trumps) }
 
     it 'chooses the highest held trump card to lead' do
-      expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: JACK, suit: DIAMONDS)
+      silence do
+        expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: JACK, suit: DIAMONDS)
+      end
     end
 
     it 'follows suit if a spade is led' do
       tricks[0].add(player: player, card: Card.new(rank: ACE, suit: SPADES))
-      expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: TEN, suit: SPADES)
+      silence do
+        expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: TEN, suit: SPADES)
+      end
     end
   end
 end

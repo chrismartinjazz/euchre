@@ -1,5 +1,11 @@
 # Notes
 
+## Conventions and learnings for next time
+
+- Use constants for things like card ranks and suits from the start.
+- Use keyword arguments for the public interface of a class (always), positional arguments for private methods in a class.
+- Immediately document expected child class methods in parent class using NotImplementedError
+
 ## Overall refactoring and adjustments needed
 
 - [x] Change throughout to use keyword arguments for interfaces, make interfaces clearer

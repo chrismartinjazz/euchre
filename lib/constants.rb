@@ -53,3 +53,6 @@ SUITS = {
     color: 'joker'
   }
 }.freeze
+
+# Utility
+ANSI_ESCAPE = /\e\[[0-9;]*m/

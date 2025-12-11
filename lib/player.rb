@@ -10,6 +10,11 @@ class Player
     @name = name
   end
 
+  def add_to_hand(cards:)
+    @hand.push(cards)
+    @hand.flatten!
+  end
+
   def reset_hand
     @hand.clear
   end
