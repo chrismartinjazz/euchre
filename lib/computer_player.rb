@@ -68,13 +68,16 @@ class ComputerPlayer < Player
     index = scores.max_by { |_k, v| v }[0]
 
     announce(scores) if DISPLAY_THINKING
+    announce(@hand[index].to_s)
 
     @hand.delete_at(index)
   end
 
   def choose_a_suit
     suits = SUITS.keys.reject { |suit| suit == JOKER_SUIT }
-    suits[rand(suits.size)]
+    suit = suits[rand(suits.size)]
+    announce(SUITS[suit][:text])
+    suit
   end
 
   private

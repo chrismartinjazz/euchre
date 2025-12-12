@@ -5,18 +5,16 @@ require_relative 'constants'
 Cell = Struct.new(:contents, :justified)
 
 # Displays bidding screen
-class DisplayBidding
+class DisplayPlayers
   def initialize(players:)
     @players = players
     @col_width = 20
-    @row_height = 3
   end
 
-  def grid(dealer:, centre_card:, centre_card_suit:)
+  def players(dealer:, centre_card:, centre_card_suit:)
     @dealer = dealer
     @centre_card = centre_card
     @centre_card_suit = centre_card_suit
-
     south, west, north, east = generate_player_cells
     centre = generate_centre_cell
     blank = Cell.new([], 'left')
@@ -55,7 +53,7 @@ class DisplayBidding
   end
 
   def hand_text(player, separator = ' |', card_back = ' %')
-    hand = player.is_a?(HumanPlayer) ? player.hand : Array.new(5) { card_back }
+    hand = player.is_a?(HumanPlayer) ? player.hand : Array.new(player.hand.length) { card_back }
     hand.join(separator)
   end
 

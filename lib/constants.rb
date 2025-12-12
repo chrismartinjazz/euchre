@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Computer AI
-DISPLAY_THINKING = true
-THINKING_TIME = 0
+DISPLAY_THINKING = false
+THINKING_TIME = 1
 
 # Ranks
 NINE = :'9'

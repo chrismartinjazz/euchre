@@ -14,9 +14,11 @@
 - [x] Fix bug where pressing enter on blank input crashes the game
 - [x] Left bower displayed as 'j' in tricks table
 - [x] Left bower displayed as 'j' in player hand (when playing a card, not when bidding)
-- [ ] Refactoring of Game and TrickManager to extract Display
+- [x] Refactoring of Game and TrickManager to extract Display
+- [x] Adjust display to refresh each time a trick is played, and for bidding to show cards held by other players (so they gradually decrease in number throughout the hand.) Rename so instead of "bidding" call it "player" display or something.
+- [x] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
 - [ ] Extract BiddingManager from Game
-- [ ] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
+- [ ] ComputerPlayer move THINKING_TIME to a class instance variable
 - [ ] Refactoring of ComputerPlayer to clean up method length
 - [ ] Update AI and fine tune, add more personality.
 
@@ -31,8 +33,8 @@
   - manage bid for trumps
 - Holds onto HumanPlayer and ComputerPlayer, Deck, TrickManager
 - Adjustments needed:
-  - [ ] Extract display related tasks into DisplayManager
-  - [ ] Make it so ComputerPlayers hands are shown with |## |## |## |## |## as their hand instead of the actual cards.
+  - [x] Extract display related tasks into DisplayManager
+  - [x] Make it so ComputerPlayers hands are shown with |## |## |## |## |## as their hand instead of the actual cards.
   - [ ] Extract bidding into BiddingManager
   - [ ] Refactor #start_game_loop to reduce method length
 
@@ -70,8 +72,8 @@
 - Plays a hand, which is a series of five tricks.
 - Displays tricks in a table, updated for each card played.
 - Adjustments needed:
-  - [ ] Extract display related tasks into same DisplayManager held by Game
-  - [ ] Clarify private methods
+  - [x] Extract display related tasks into same DisplayManager held by Game
+  - [x] Clarify private methods
 
 ### Trick
 
@@ -92,6 +94,7 @@
 - Knows its rank and suit
 - Reports its suit either exactly as stored (if no trumps argument supplied) or considering trump suit and Euchre rules
 - Includes a two digit string representation of glyph and rank.
+- [x] Add handling of blank cards (for face down cards)
 
 ## Game Planning
 

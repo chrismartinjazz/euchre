@@ -20,6 +20,7 @@ class TrickManager
     @going_alone = going_alone
     @bidding_team = bidding_team
     @player_order = player_order
+    @dealer = player_order[-1]
 
     @tricks = Array.new(HAND_SIZE) { Trick.new(trumps: @trumps, player_count: @player_order.length) }
     @trick_score = 0
@@ -31,6 +32,7 @@ class TrickManager
     HAND_SIZE.times do |index|
       play_trick(index)
       @trick_score += 1 if bidding_team_wins_trick?(index)
+      @display.message(message: "#{@tricks[index].winner} wins the trick.", confirmation: true)
       rotate_player_order_to_start_with(@tricks[index].winner)
     end
 
@@ -42,10 +44,17 @@ class TrickManager
 
   def play_trick(index)
     @player_order.each do |player|
-      @display.tricks(trumps: @trumps, tricks: @tricks, bidding_team: @bidding_team)
+      update_display
       card = player.play_card(trumps: @trumps, tricks: @tricks, trick_index: index)
       @tricks[index].add(player: player, card: card)
     end
+    update_display
+  end
+
+  def update_display
+    @display.clear_screen
+    @display.score
+    @display.players(dealer: @dealer)
     @display.tricks(trumps: @trumps, tricks: @tricks, bidding_team: @bidding_team)
   end
 

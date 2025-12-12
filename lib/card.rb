@@ -5,8 +5,8 @@ require_relative 'constants'
 # A playing card. Reports its rank and suit, based on the trump suit, accounting for joker and bowers.
 class Card
   def initialize(rank:, suit:)
-    @rank = rank.to_s.upcase.to_sym
-    @suit = suit.to_s.upcase.to_sym
+    @rank = rank == '' ? :blank : rank.to_s.upcase.to_sym
+    @suit = suit == '' ? :blank : suit.to_s.upcase.to_sym
   end
 
   def rank(trumps: nil)
@@ -22,6 +22,8 @@ class Card
   end
 
   def to_s(trumps: nil)
+    return '%%' if @rank == :blank
+
     glyph = SUITS[@suit][:glyph]
     "#{rank(trumps: trumps)}#{glyph}"
   end

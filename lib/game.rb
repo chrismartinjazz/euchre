@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'io/console'
 require_relative 'card'
 require_relative 'computer_player'
 require_relative 'constants'
@@ -24,16 +23,22 @@ class Game
     @team2 = [@east, @west]
     @dealer = @east
     @score = { @team1 => 0, @team2 => 0 }
-    @display = Display.new(players: @player_order)
+
+    @display_order = @player_order.dup
+    @display = Display.new(
+      players: @display_order,
+      score: @score
+    )
+    @face_down_card = Card.new(rank: '', suit: '')
   end
 
   def start_game_loop
     loop do
-      $stdout.clear_screen
+      @display.clear_screen
       rotate_player_order_to_start_with(player_after(@dealer))
       deal
-      @display.score(score: @score)
-      @display.bidding_grid(dealer: @dealer, centre_card: @centre_card, centre_card_suit: @centre_card_suit)
+      @display.score
+      @display.players(dealer: @dealer, centre_card: @centre_card, centre_card_suit: @centre_card_suit)
       trumps, bidder, going_alone = bid_for_trumps
 
       if trumps.nil?
@@ -61,11 +66,11 @@ class Game
       break if game_over?
 
       @dealer = player_after(@dealer)
-      @display.confirm_next_round(dealer: @dealer)
+      @display.message(message: "New dealer is #{@dealer}. Reshuffling . . . ", confirmation: true)
     end
 
     @display.message(message: 'Game Over!')
-    @display.score(score: @score)
+    @display.score
   end
 
   private
@@ -93,6 +98,7 @@ class Game
   def handle_centre_card_is_joker
     @display.message(message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.')
     @dealer.choose_a_suit
+    @display.message(message: '', confirmation: true)
   end
 
   # Return the bidded trump suit and the bidder (player object) or nil if all pass twice.
@@ -109,8 +115,11 @@ class Game
     end
 
     # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
-    @display.message(message: "#{@dealer}: I turn it down.")
+    @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
     available_trumps = SUITS.keys.reject { |suit| [JOKER_SUIT, @centre_card_suit].include?(suit) }
+    @display.clear_screen
+    @display.score
+    @display.players(dealer: @dealer, centre_card: @face_down_card, centre_card_suit: @face_down_card.suit)
 
     @player_order.each do |player|
       response = player.bid_trumps(options: available_trumps)
