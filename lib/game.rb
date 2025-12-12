@@ -8,6 +8,7 @@ require_relative 'display'
 require_relative 'human_player'
 require_relative 'player'
 require_relative 'trick_manager'
+require_relative 'bidding_manager'
 
 # The game
 class Game
@@ -29,38 +30,41 @@ class Game
       players: @display_order,
       score: @score
     )
-    @face_down_card = Card.new(rank: '', suit: '')
   end
 
   def start_game_loop
     loop do
-      @display.clear_screen
       rotate_player_order_to_start_with(player_after(@dealer))
       deal
+
+      @display.clear_screen
       @display.score
       @display.players(dealer: @dealer, centre_card: @centre_card, centre_card_suit: @centre_card_suit)
-      trumps, bidder, going_alone = bid_for_trumps
 
-      if trumps.nil?
+      bidding_manager = BiddingManager.new(display: @display, team1: @team1, team2: @team2)
+      bidding_manager.handle_bidding(
+        player_order: @player_order,
+        centre_card: @centre_card,
+        centre_card_suit: @centre_card_suit
+      )
+
+      if bidding_manager.bid.nil?
         @dealer = player_after(@dealer)
         @display.confirm_next_round(dealer: @dealer)
         next
       end
 
-      bidding_team, defending_team = set_teams(bidder, going_alone)
-      trick_player_order = set_trick_player_order(bidding_team, defending_team)
-
       trick_manager = TrickManager.new(
         display: @display,
-        trumps: trumps,
-        going_alone: going_alone,
-        bidding_team: bidding_team,
-        player_order: trick_player_order
+        trumps: bidding_manager.bid,
+        going_alone: bidding_manager.going_alone,
+        bidding_team: bidding_manager.bidders,
+        player_order: bidding_manager.player_order
       )
       trick_manager.play_hand
       winner = trick_manager.winner
       points = trick_manager.points
-      winning_team = winner == 'bidders' ? bidding_team : defending_team
+      winning_team = winner == 'bidders' ? bidding_manager.bidders : bidding_manager.defenders
       @score[winning_team] += points
       @display.hand_result(winning_team: winning_team, points: points)
       break if game_over?
@@ -99,56 +103,6 @@ class Game
     @display.message(message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.')
     @dealer.choose_a_suit
     @display.message(message: '', confirmation: true)
-  end
-
-  # Return the bidded trump suit and the bidder (player object) or nil if all pass twice.
-  def bid_for_trumps
-    @player_order.each do |player|
-      response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
-      next if response[:bid] == :pass
-
-      trumps = response[:bid]
-      going_alone = response[:going_alone]
-
-      @dealer.exchange_card(card: @centre_card, trumps: trumps)
-      return trumps, player, going_alone
-    end
-
-    # If all players have passed... the centre card is turned down. Remaining suits can be chosen as trumps.
-    @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
-    available_trumps = SUITS.keys.reject { |suit| [JOKER_SUIT, @centre_card_suit].include?(suit) }
-    @display.clear_screen
-    @display.score
-    @display.players(dealer: @dealer, centre_card: @face_down_card, centre_card_suit: @face_down_card.suit)
-
-    @player_order.each do |player|
-      response = player.bid_trumps(options: available_trumps)
-      next if response[:bid] == :pass
-
-      trumps = response[:bid]
-      going_alone = response[:going_alone]
-
-      return trumps, player, going_alone
-    end
-
-    # If all players have passed again...
-    nil
-  end
-
-  def set_teams(bidder, going_alone)
-    bidding_team = if going_alone
-                     [bidder]
-                   elsif @team1.include?(bidder)
-                     @team1
-                   else
-                     @team2
-                   end
-    defending_team = @team1.include?(bidding_team[0]) ? @team2 : @team1
-    [bidding_team, defending_team]
-  end
-
-  def set_trick_player_order(bidding_team, defending_team)
-    @player_order.filter { |player| (bidding_team + defending_team).include?(player) }
   end
 
   def game_over?

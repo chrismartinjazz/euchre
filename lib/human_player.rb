@@ -16,7 +16,7 @@ class HumanPlayer < Player
     bid = input == '1' ? suit : :pass
     going_alone = bid == :pass ? false : going_alone?
 
-    {bid: bid, going_alone: going_alone}
+    {player: self, bid: bid, going_alone: going_alone}
   end
 
   def bid_trumps(options:)
@@ -29,7 +29,7 @@ class HumanPlayer < Player
     bid = input == 'P' ? :pass : input.to_sym
     going_alone = bid == :pass ? false : going_alone?
 
-    {bid: bid, going_alone: going_alone}
+    {player: self, bid: bid, going_alone: going_alone}
   end
 
   def exchange_card(card:, trumps:, **_keyword_args)
