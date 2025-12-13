@@ -59,7 +59,7 @@ class TrickManager
     @display.clear_screen
     @display.score
     @display.players(dealer: @dealer)
-    @display.tricks(players: @player_order, trumps: @trumps, tricks: @tricks, bidders: @bidders)
+    @display.tricks(trumps: @trumps, tricks: @tricks, bidders: @bidders)
   end
 
   def bidders_win_trick?(index)

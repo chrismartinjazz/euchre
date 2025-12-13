@@ -18,10 +18,10 @@
 - [x] Adjust display to refresh each time a trick is played, and for bidding to show cards held by other players (so they gradually decrease in number throughout the hand.) Rename so instead of "bidding" call it "player" display or something.
 - [x] Change first display to make clearer who is the dealer (a symbol next to their name) and have their name next to their hand.
 - [x] Extract BiddingManager from Game, overall refactoring of Game main method.
-- [ ] Fix bug where going alone means play only against own team mate! (Opposite of intended behaviour)
+- [x] Fix bug where going alone means play only against own team mate! (Opposite of intended behaviour)
+- [x] Adjust display initialization to make it clearer
 - [ ] ComputerPlayer move THINKING_TIME to a class instance variable, add some variability to thinking time in announce method.
-- [ ] Refactoring of ComputerPlayer to clean up method length
-- [ ] Update AI and fine tune, add more personality.
+- [ ] Update ComputerPlayer AI and fine tune, add more personality and card playing logic.
 
 ## Classes
 
@@ -36,8 +36,8 @@
 - Adjustments needed:
   - [x] Extract display related tasks into DisplayManager
   - [x] Make it so ComputerPlayers hands are shown with |## |## |## |## |## as their hand instead of the actual cards.
-  - [ ] Extract bidding into BiddingManager
-  - [ ] Refactor #start_game_loop to reduce method length
+  - [x] Extract bidding into BiddingManager
+  - [x] Refactor #start_game_loop to reduce method length
 
 ### Player
 
@@ -57,14 +57,14 @@
 - Evaluates hands based on average of card numerical value, considering trump suit
 - Plays the strongest valid card in every trick context
 - Adjustments needed:
-  - [ ] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
-  - [ ] Add variability of play style through an "aggression" parameter and a "consistency" parameter. More aggressive or less aggressive in bidding, more or less variable in aggression.
-  - [ ] Add awareness of context influencing playing of cards:
+  - [ ] Add awareness of context influencing playing of cards and bidding
     - [ ] If the strongest card in hand can't win the trick, play the weakest valid card instead
     - [ ] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
     - [ ] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
     - [ ] If hold trumps, and have the option to safely 'short' a suit from own hand, take that option. E.g. hold a single, low-ranked club trump, three low-ranked diamonds and a low-ranked heart. Lead with the low-ranked heart to open the possibility of trumping the second trick.
     - [ ] When bidding on centre card, consider the strength of the card in the prospective trump suit and adjust minimum hand score up if adding card to own team, down if adding card to opponent team.
+  - [ ] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
+  - [ ] Add variability of play style through an "aggression" parameter and a "consistency" parameter. More aggressive or less aggressive in bidding, more or less variable in aggression.
 
 ### TrickManager
 

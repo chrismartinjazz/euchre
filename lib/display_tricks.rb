@@ -10,8 +10,11 @@ class DisplayTricks
     @min_col_width = 7
   end
 
-  def table(trumps:, tricks:, bidders:, players: nil)
-    @display_order = players if @display_order.nil?
+  def prepare(display_order:)
+    @display_order = display_order
+  end
+
+  def table(trumps:, tricks:, bidders:)
     @trumps = trumps
     @tricks = tricks
     @bidders = bidders

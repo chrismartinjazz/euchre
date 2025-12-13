@@ -8,11 +8,14 @@ Cell = Struct.new(:contents, :justified)
 class DisplayPlayers
   def initialize
     @display_order = nil
-    @col_width = 20
+    @col_width = DISPLAY_WIDTH / 3
   end
 
-  def grid(dealer:, centre_card:, centre_card_suit:, players: nil)
-    @display_order = players if @display_order.nil?
+  def prepare(display_order:)
+    @display_order = display_order
+  end
+
+  def grid(dealer:, centre_card:, centre_card_suit:)
     @dealer = dealer
     @centre_card = centre_card
     @centre_card_suit = centre_card_suit
@@ -65,9 +68,8 @@ class DisplayPlayers
   def print_grid(grid, heights)
     grid.each_with_index do |grid_row, grid_row_index|
       (heights[grid_row_index] + 1).times do |cell_row_index|
-        row_parts = []
-        grid_row.each do |cell|
-          row_parts.push(justify(cell.contents[cell_row_index], cell.justified))
+        row_parts = grid_row.map do |cell|
+          justify(cell.contents[cell_row_index], cell.justified)
         end
         puts row_parts.join
       end

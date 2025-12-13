@@ -33,8 +33,9 @@ class DealManager
 
   def handle_centre_card_is_joker
     @display.message(message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.')
-    @dealer.choose_a_suit
+    suit = @dealer.choose_a_suit
     @display.message(message: '', confirmation: true)
+    suit
   end
 
   def player_after(player)

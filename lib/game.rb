@@ -16,15 +16,17 @@ class Game
     west = ComputerPlayer.new(name: 'West')
     north = ComputerPlayer.new(name: 'North')
     east = ComputerPlayer.new(name: 'East')
+    @display_order = [south, west, north, east].freeze
     team1 = [south, north]
     team2 = [east, west]
 
-    @display_order = [south, west, north, east]
     @display = Display.new
-    @deal_manager = DealManager.new(display: @display, player_order: [south, west, north, east], dealer: east)
+    @deal_manager = DealManager.new(display: @display, player_order: @display_order.dup, dealer: east)
     @bidding_manager = BiddingManager.new(display: @display, team1: team1, team2: team2)
     @trick_manager = TrickManager.new(display: @display)
     @score_manager = ScoreManager.new(display: @display, team1: team1, team2: team2)
+
+    @display.prepare(display_order: @display_order, teams: [team1, team2], score: @score_manager.score)
   end
 
   def start_game_loop
@@ -64,12 +66,11 @@ class Game
 
   def update_display
     @display.clear_screen
-    @display.score(teams: [@score_manager.team1, @score_manager.team2], score: @score_manager.score)
+    @display.score
     @display.players(
       dealer: @deal_manager.dealer,
       centre_card: @deal_manager.centre_card,
-      centre_card_suit: @deal_manager.centre_card_suit,
-      players: @display_order
+      centre_card_suit: @deal_manager.centre_card_suit
     )
   end
 end

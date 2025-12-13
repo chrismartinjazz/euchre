@@ -14,20 +14,26 @@ class Display
     @face_down_card = Card.new(rank: '', suit: '')
   end
 
+  def prepare(display_order:, teams:, score:)
+    @display_score.prepare(teams: teams, score: score)
+    @display_players.prepare(display_order: display_order)
+    @display_tricks.prepare(display_order: display_order)
+  end
+
   def clear_screen
     system('cls') || system('clear')
   end
 
-  def score(teams: nil, score: nil)
-    @display_score.scoreboard(teams: teams, score: score)
+  def score
+    @display_score.scoreboard
   end
 
-  def players(dealer:, centre_card: @face_down_card, centre_card_suit: @face_down_card.suit, players: nil)
-    @display_players.grid(dealer: dealer, centre_card: centre_card, centre_card_suit: centre_card_suit, players: players)
+  def players(dealer:, centre_card: @face_down_card, centre_card_suit: @face_down_card.suit)
+    @display_players.grid(dealer: dealer, centre_card: centre_card, centre_card_suit: centre_card_suit)
   end
 
-  def tricks(trumps:, tricks:, bidders:, players: nil)
-    @display_tricks.table(trumps: trumps, tricks: tricks, bidders: bidders, players: players)
+  def tricks(trumps:, tricks:, bidders:)
+    @display_tricks.table(trumps: trumps, tricks: tricks, bidders: bidders)
   end
 
   def message(message: '', confirmation: false)

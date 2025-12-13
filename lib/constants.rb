@@ -4,6 +4,9 @@
 DISPLAY_THINKING = false
 THINKING_TIME = 1
 
+# Display
+DISPLAY_WIDTH = 80
+
 # Ranks
 NINE = :'9'
 TEN = :T
