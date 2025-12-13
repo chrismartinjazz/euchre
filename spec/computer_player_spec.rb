@@ -12,8 +12,10 @@ THINKING_TIME = 0
 RSpec.describe ComputerPlayer do
   it 'chooses a random suit' do
     player = ComputerPlayer.new
-    chosen_suit = player.choose_a_suit
-    expect([CLUBS, DIAMONDS, HEARTS, SPADES].include?(chosen_suit)).to eq true
+    silence do
+      chosen_suit = player.choose_a_suit
+      expect([CLUBS, DIAMONDS, HEARTS, SPADES].include?(chosen_suit)).to eq true
+    end
   end
 
   context 'with a near perfect clubs hand' do

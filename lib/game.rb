@@ -1,76 +1,59 @@
 # frozen_string_literal: true
 
-require_relative 'card'
+require_relative 'human_player'
 require_relative 'computer_player'
-require_relative 'constants'
 require_relative 'deck'
 require_relative 'display'
-require_relative 'human_player'
-require_relative 'player'
+require_relative 'deal_manager'
 require_relative 'trick_manager'
 require_relative 'bidding_manager'
+require_relative 'score_manager'
 
-# The game
+# The game.
 class Game
-  POINTS_TO_WIN_GAME = 11
-
   def initialize
-    @south = HumanPlayer.new(name: 'South')
-    @west = ComputerPlayer.new(name: 'West')
-    @north = ComputerPlayer.new(name: 'North')
-    @east = ComputerPlayer.new(name: 'East')
-    @player_order = [@south, @west, @north, @east]
-    @team1 = [@south, @north]
-    @team2 = [@east, @west]
-    @dealer = @east
-    @score = { @team1 => 0, @team2 => 0 }
+    south = HumanPlayer.new(name: 'South')
+    west = ComputerPlayer.new(name: 'West')
+    north = ComputerPlayer.new(name: 'North')
+    east = ComputerPlayer.new(name: 'East')
+    team1 = [south, north]
+    team2 = [east, west]
 
-    @display_order = @player_order.dup
-    @display = Display.new(
-      players: @display_order,
-      score: @score
-    )
+    @display_order = [south, west, north, east]
+    @display = Display.new
+    @deal_manager = DealManager.new(display: @display, player_order: [south, west, north, east], dealer: east)
+    @bidding_manager = BiddingManager.new(display: @display, team1: team1, team2: team2)
+    @trick_manager = TrickManager.new(display: @display)
+    @score_manager = ScoreManager.new(display: @display, team1: team1, team2: team2)
   end
 
   def start_game_loop
     loop do
-      rotate_player_order_to_start_with(player_after(@dealer))
-      deal
-
-      @display.clear_screen
-      @display.score
-      @display.players(dealer: @dealer, centre_card: @centre_card, centre_card_suit: @centre_card_suit)
-
-      bidding_manager = BiddingManager.new(display: @display, team1: @team1, team2: @team2)
-      bidding_manager.handle_bidding(
-        player_order: @player_order,
-        centre_card: @centre_card,
-        centre_card_suit: @centre_card_suit
+      @deal_manager.deal
+      update_display
+      @bidding_manager.handle_bidding(
+        player_order: @deal_manager.player_order,
+        centre_card: @deal_manager.centre_card,
+        centre_card_suit: @deal_manager.centre_card_suit
       )
 
-      if bidding_manager.bid.nil?
-        @dealer = player_after(@dealer)
-        @display.confirm_next_round(dealer: @dealer)
+      if @bidding_manager.bid.nil?
+        @deal_manager.rotate_player_order
         next
       end
 
-      trick_manager = TrickManager.new(
-        display: @display,
-        trumps: bidding_manager.bid,
-        going_alone: bidding_manager.going_alone,
-        bidding_team: bidding_manager.bidders,
-        player_order: bidding_manager.player_order
+      @trick_manager.play_hand(
+        trumps: @bidding_manager.bid,
+        going_alone: @bidding_manager.going_alone,
+        bidders: @bidding_manager.bidders,
+        defenders: @bidding_manager.defenders,
+        player_order: @bidding_manager.player_order
       )
-      trick_manager.play_hand
-      winner = trick_manager.winner
-      points = trick_manager.points
-      winning_team = winner == 'bidders' ? bidding_manager.bidders : bidding_manager.defenders
-      @score[winning_team] += points
-      @display.hand_result(winning_team: winning_team, points: points)
-      break if game_over?
 
-      @dealer = player_after(@dealer)
-      @display.message(message: "New dealer is #{@dealer}. Reshuffling . . . ", confirmation: true)
+      @score_manager.update_score(winner: @trick_manager.winner, points: @trick_manager.points)
+      break if @score_manager.game_over?
+
+      @deal_manager.rotate_player_order
     end
 
     @display.message(message: 'Game Over!')
@@ -79,33 +62,14 @@ class Game
 
   private
 
-  def rotate_player_order_to_start_with(starting_player)
-    @player_order.rotate!(@player_order.find_index(starting_player))
-  end
-
-  def player_after(player)
-    player_index = @player_order.find_index(player)
-    return @player_order[0] if player_index == @player_order.length - 1
-
-    @player_order[player_index + 1]
-  end
-
-  def deal
-    @deck = Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
-    @deck.shuffle
-    @player_order.each(&:reset_hand)
-    @player_order.each { |player| player.add_to_hand(cards: @deck.deal(count: 5)) }
-    @centre_card = @deck.draw_one
-    @centre_card_suit = @centre_card.suit == JOKER_SUIT ? handle_centre_card_is_joker : @centre_card.suit
-  end
-
-  def handle_centre_card_is_joker
-    @display.message(message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.')
-    @dealer.choose_a_suit
-    @display.message(message: '', confirmation: true)
-  end
-
-  def game_over?
-    @score[@team1] >= POINTS_TO_WIN_GAME || @score[@team2] >= POINTS_TO_WIN_GAME
+  def update_display
+    @display.clear_screen
+    @display.score(teams: [@score_manager.team1, @score_manager.team2], score: @score_manager.score)
+    @display.players(
+      dealer: @deal_manager.dealer,
+      centre_card: @deal_manager.centre_card,
+      centre_card_suit: @deal_manager.centre_card_suit,
+      players: @display_order
+    )
   end
 end

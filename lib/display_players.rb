@@ -6,32 +6,33 @@ Cell = Struct.new(:contents, :justified)
 
 # Displays bidding screen
 class DisplayPlayers
-  def initialize(players:)
-    @players = players
+  def initialize
+    @display_order = nil
     @col_width = 20
   end
 
-  def players(dealer:, centre_card:, centre_card_suit:)
+  def grid(dealer:, centre_card:, centre_card_suit:, players: nil)
+    @display_order = players if @display_order.nil?
     @dealer = dealer
     @centre_card = centre_card
     @centre_card_suit = centre_card_suit
     south, west, north, east = generate_player_cells
     centre = generate_centre_cell
     blank = Cell.new([], 'left')
-    grid = [
+    player_grid = [
       [blank, north, blank],
       [west, centre, east],
       [blank, south, blank]
     ]
-    heights = row_heights(grid)
-    print_grid(grid, heights)
+    heights = row_heights(player_grid)
+    print_grid(player_grid, heights)
     nil
   end
 
   private
 
   def generate_player_cells
-    south, west, north, east = @players.each_with_object([]) do |player, array|
+    south, west, north, east = @display_order.each_with_object([]) do |player, array|
       array.push(Cell.new([player_name(player), hand_text(player)], ''))
     end
     south.justified = 'centre'

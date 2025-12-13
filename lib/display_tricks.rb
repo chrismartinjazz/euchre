@@ -4,16 +4,17 @@ require_relative 'constants'
 
 # Handles displaying the tricks table
 class DisplayTricks
-  def initialize(players:)
-    @players = players
+  def initialize
+    @display_order = nil
     @stub_width = 4
     @min_col_width = 7
   end
 
-  def table(trumps:, tricks:, bidding_team:)
+  def table(trumps:, tricks:, bidders:, players: nil)
+    @display_order = players if @display_order.nil?
     @trumps = trumps
     @tricks = tricks
-    @bidding_team = bidding_team
+    @bidders = bidders
     @col_width = calculate_col_width
 
     table = generate_trick_table
@@ -23,7 +24,7 @@ class DisplayTricks
   private
 
   def calculate_col_width
-    max_player_name_length = @players.max_by { |player| player.to_s.length }.to_s.length
+    max_player_name_length = @display_order.max_by { |player| player.to_s.length }.to_s.length
     [max_player_name_length + 3, @min_col_width].max
   end
 
@@ -37,8 +38,8 @@ class DisplayTricks
 
   def generate_trick_table_header
     cells = [SUITS[@trumps][:glyph].to_s]
-    @players.each do |player|
-      cells.push(@bidding_team.include?(player) ? "#{player.name}*" : player.name)
+    @display_order.each do |player|
+      cells.push(@bidders.include?(player) ? "#{player.name}*" : player.name)
     end
     cells.push('Winner')
     generate_row(cells, ' ')
@@ -48,7 +49,7 @@ class DisplayTricks
     number = index + 1
     lead_suit_glyph = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
     cells = ["#{number}:#{lead_suit_glyph}"]
-    @players.each do |player|
+    @display_order.each do |player|
       card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: @trumps)
       winning = trick.winning_play && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
       cells.push("#{card}#{winning}")

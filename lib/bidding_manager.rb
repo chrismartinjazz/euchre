@@ -15,15 +15,13 @@ class BiddingManager
   def handle_bidding(player_order:, centre_card:, centre_card_suit:)
     init_bidding(player_order: player_order, centre_card: centre_card, centre_card_suit: centre_card_suit)
     update_display(show_centre_card: true)
-    bid_centre_card
+    bidding_round_one
     return @bid unless @bid.nil?
 
     @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
     update_display(show_centre_card: false)
-    bid_trumps([CLUBS, DIAMONDS, HEARTS, SPADES] - [@centre_card_suit])
-    return @bid unless @bid.nil?
-
-    nil
+    bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [@centre_card_suit])
+    @bid
   end
 
   private
@@ -46,39 +44,47 @@ class BiddingManager
     end
   end
 
-  def bid_centre_card
+  def bidding_round_one
     @player_order.each do |player|
       response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
       next if response[:bid] == :pass
 
       @dealer.exchange_card(card: @centre_card, trumps: response[:bid])
-      handle_response(response)
+      handle_response(response, player)
       break
     end
   end
 
-  def bid_trumps(available_trumps)
+  def bidding_round_two(available_trumps)
     @player_order.each do |player|
       response = player.bid_trumps(options: available_trumps)
       next if response[:bid] == :pass
 
-      handle_response(response)
+      handle_response(response, player)
       break
     end
   end
 
-  def handle_response(response)
+  def handle_response(response, player)
     @bid = response[:bid]
     @going_alone = response[:going_alone]
-    @bidders = if @going_alone
-                 [response[:player]]
-               elsif @team1.include?(response[:player])
-                 @team1
-               else
-                 @team2
-               end
-    @defenders = @team1.include?(@bidders[0]) ? @team2 : @team1
-    @player_order.filter! { |player| (@bidders + @defenders).include?(player) }
+    determine_bidders_and_defenders(player)
+    update_player_order(player)
     nil
+  end
+
+  def determine_bidders_and_defenders(player)
+    if @team1.include?(player)
+      @bidders = @team1
+      @defenders = @team2
+    else
+      @bidders = @team2
+      @defenders = @team1
+    end
+  end
+
+  def update_player_order(player)
+    trick_players = @going_alone ? [player] + @defenders : @bidders + @defenders
+    @player_order = @player_order.intersection(trick_players)
   end
 end
