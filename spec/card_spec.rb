@@ -32,7 +32,7 @@ RSpec.describe Card do
 
     it 'correctly reports its suit, with respect to the trump suit, handling left bower' do
       expect(jack_of_spades.suit(trumps: SPADES)).to eq SPADES
-      expect(jack_of_spades.suit(trumps: CLUBS)).to eq SPADES
+      expect(jack_of_spades.suit(trumps: CLUBS)).to eq CLUBS
       expect(jack_of_spades.suit(trumps: HEARTS)).to eq SPADES
     end
   end

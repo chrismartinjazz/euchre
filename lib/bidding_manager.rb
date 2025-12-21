@@ -46,7 +46,6 @@ class BiddingManager
 
   def bidding_round_one
     @player_order.each do |player|
-      # response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
       response = player.decide_bid(
         options: [@centre_card_suit],
         card: @centre_card,
@@ -71,7 +70,6 @@ class BiddingManager
 
   def bidding_round_two(available_trumps)
     @player_order.each do |player|
-      # response = player.bid_trumps(options: available_trumps)
       response = player.decide_bid(options: available_trumps)
       next if response[:bid] == :pass
 

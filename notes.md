@@ -20,8 +20,10 @@
 - [x] Extract BiddingManager from Game, overall refactoring of Game main method.
 - [x] Fix bug where going alone means play only against own team mate! (Opposite of intended behaviour)
 - [x] Adjust display initialization to make it clearer
-- [ ] ComputerPlayer move THINKING_TIME to a class instance variable, add some variability to thinking time in announce method.
-- [ ] Update ComputerPlayer AI and fine tune, add more personality and card playing logic.
+- [x] Update ComputerPlayer AI and fine tune, add more card playing logic.
+- [ ] Refactor ComputerPlayer (and then HumanPlayer) so it is all at the same level of abstraction - add a ComputerPlayerTricks class
+- [ ] Update all the tests to make them consistent in formatting, use of instance doubles
+- [ ] ComputerPlayer move THINKING_TIME to a class instance variable.
 
 ## Classes
 
@@ -58,13 +60,11 @@
 - Plays the strongest valid card in every trick context
 - Adjustments needed:
   - [ ] Add awareness of context influencing playing of cards and bidding
-    - [ ] If the strongest card in hand can't win the trick, play the weakest valid card instead
-    - [ ] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
-    - [ ] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
-    - [ ] If hold trumps, and have the option to safely 'short' a suit from own hand, take that option. E.g. hold a single, low-ranked club trump, three low-ranked diamonds and a low-ranked heart. Lead with the low-ranked heart to open the possibility of trumping the second trick.
-    - [ ] When bidding on centre card, consider the strength of the card in the prospective trump suit and adjust minimum hand score up if adding card to own team, down if adding card to opponent team.
-  - [ ] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
-  - [ ] Add variability of play style through an "aggression" parameter and a "consistency" parameter. More aggressive or less aggressive in bidding, more or less variable in aggression.
+    - [x] If the strongest card in hand can't win the trick, play the weakest valid card instead
+    - [x] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
+    - [x] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
+    - [x] When bidding on centre card, consider the strength of the card in the prospective trump suit and adjust minimum hand score up if adding card to own team.
+  - [x] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
 
 ### TrickManager
 
@@ -161,20 +161,3 @@ announce the winners
 exit the game loop
 Clear the table
 Reset all players hands to be empty
-
-## Refactoring
-
-ComputerPlayer object:
-
-Should combine the bid_centre_card and the bid_trumps methods into a single method: bid(options:, dealer: false, card: nil)
-
-- Interface:
-  - #bid_centre_card(card:, suit:, dealer:)
-    - #score_hand (currently takes suit, hand - adapt to cope with an extra card)
-    - #announce (move to @display, and make it )
-    - Potential other methods to extract:
-    - #determine_bid(score, suit) - this would go in ComputerPlayer class
-    - #announce_bid(bid, suit, dealer)
-  - #bid_trumps(options:)
-    - #score_hand (needs to handle multiple options)
-    - #announce (move to @display)

@@ -9,6 +9,8 @@ require_relative 'modules/computer_player_helpers'
 class ComputerPlayerBidding
   include ComputerPlayerHelpers
 
+  attr_writer :name
+
   CARD_EVALUATION_FUNCTION = ->(card_score) { card_score**1.05 }
   BID_SCORE = 6.5
   GO_ALONE_SCORE = 9.5

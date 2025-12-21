@@ -28,7 +28,7 @@ class HumanPlayerBidding
   def exchange_card!(card:, trumps:, hand:)
     @hand = hand
     @hand.push(card)
-    prompt = "Choose a card to discard (1-#{@hand.size}):\n#{hand_text(trumps)}"
+    prompt = "Choose a card to discard (1-#{@hand.size}):\n#{hand_text(@hand, trumps)}"
     valid_inputs = [*1..(@hand.size)]
     index = get_player_input(@name, prompt, valid_inputs).to_i - 1
     p index

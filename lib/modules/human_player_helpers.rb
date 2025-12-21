@@ -15,10 +15,10 @@ module HumanPlayerHelpers
 
   # e.g. "|TD |9H |3D |JS |J? |"
   #      " 1   2   3   4   5"
-  def hand_text(trumps)
-    hand = "|#{@hand.map { |card| card.to_s(trumps: trumps) }.join(' |')} |"
-    numbers = 1.upto(@hand.length).with_object([]) { |number, array| array << "#{number}   " }.join.strip
-    "#{hand}\n #{numbers}"
+  def hand_text(hand, trumps)
+    hand_string = "|#{hand.map { |card| card.to_s(trumps: trumps) }.join(' |')} |"
+    numbers_string = 1.upto(hand.length).with_object([]) { |number, array| array << "#{number}   " }.join.strip
+    "#{hand_string}\n #{numbers_string}"
   end
 
   private
