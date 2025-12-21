@@ -5,7 +5,7 @@ class Player
   attr_reader :name
   attr_accessor :hand
 
-  def initialize(name: 'Unknown')
+  def initialize(name: 'Unknown', **_keyword_args)
     @hand = []
     @name = name
   end

@@ -39,7 +39,7 @@ class Game
         centre_card_suit: @deal_manager.centre_card_suit
       )
 
-      if @bidding_manager.bid.nil?
+      if @bidding_manager.bid == :pass
         @deal_manager.rotate_player_order
         next
       end

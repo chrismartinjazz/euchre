@@ -30,7 +30,7 @@ RSpec.describe ComputerPlayer do
     it 'orders up centre_card if it is a club' do
       card = Card.new(rank: TEN, suit: CLUBS)
       silence do
-        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        response = player.decide_bid(options: [CLUBS], card: card)
         expect(response[:bid]).to eq card.suit
       end
     end
@@ -38,7 +38,7 @@ RSpec.describe ComputerPlayer do
     it 'does not order up centre_card if it is a diamond' do
       card = Card.new(rank: TEN, suit: DIAMONDS)
       silence do
-        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        response = player.decide_bid(options: [DIAMONDS], card: card)
         expect(response[:bid]).to eq :pass
       end
     end
@@ -46,7 +46,7 @@ RSpec.describe ComputerPlayer do
     it 'goes alone when ordering up centre_card if it is a club' do
       card = Card.new(rank: TEN, suit: CLUBS)
       silence do
-        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        response = player.decide_bid(options: [CLUBS], card: card)
         expect(response[:bid]).to eq card.suit
         expect(response[:going_alone]).to eq true
       end
@@ -54,7 +54,7 @@ RSpec.describe ComputerPlayer do
 
     it 'bids clubs and goes alone' do
       silence do
-        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
+        response = player.decide_bid(options: [CLUBS, DIAMONDS, HEARTS])
         expect(response[:bid]).to eq CLUBS
         expect(response[:going_alone]).to eq true
       end
@@ -62,17 +62,17 @@ RSpec.describe ComputerPlayer do
 
     it 'passes if offered the two red suits only' do
       silence do
-        response = player.bid_trumps(options: [DIAMONDS, HEARTS])
+        response = player.decide_bid(options: [DIAMONDS, HEARTS])
         expect(response[:bid]).to eq :pass
         expect(response[:going_alone]).to eq false
       end
     end
 
     it 'chooses the lowest card to exchange with the next highest trump' do
-      silence do
-        discard = player.exchange_card(card: Card.new(rank: KING, suit: CLUBS), trumps: CLUBS)
+      # silence do
+        discard = player.exchange_card!(card: Card.new(rank: KING, suit: CLUBS), trumps: CLUBS)
         expect(discard).to have_attributes(rank: ACE, suit: SPADES)
-      end
+      # end
     end
   end
 
@@ -88,7 +88,7 @@ RSpec.describe ComputerPlayer do
     it 'orders up centre_card if it is a diamond but does not go alone' do
       card = Card.new(rank: NINE, suit: DIAMONDS)
       silence do
-        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        response = player.decide_bid(options: [DIAMONDS], card: card)
         expect(response[:bid]).to eq card.suit
         expect(response[:going_alone]).to eq false
       end
@@ -97,14 +97,14 @@ RSpec.describe ComputerPlayer do
     it 'passes on centre_card if it is a heart' do
       card = Card.new(rank: NINE, suit: HEARTS)
       silence do
-        response = player.bid_centre_card(card: card, suit: card.suit, dealer: false)
+        response = player.decide_bid(options: [HEARTS], card: card)
         expect(response[:bid]).to eq :pass
       end
     end
 
     it 'chooses diamonds as trumps and does not go alone' do
       silence do
-        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS])
+        response = player.decide_bid(options: [CLUBS, DIAMONDS, HEARTS])
         expect(response[:bid]).to eq DIAMONDS
         expect(response[:going_alone]).to eq false
       end
@@ -133,6 +133,13 @@ RSpec.describe ComputerPlayer do
       tricks[0].add(player: player, card: Card.new(rank: ACE, suit: SPADES))
       silence do
         expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: TEN, suit: SPADES)
+      end
+    end
+
+    it 'plays the weakest valid card, if it cannot win the trick' do
+      tricks[1].add(player: player, card: Card.new(rank: JOKER, suit: JOKER_SUIT))
+      silence do
+        expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 1)).to have_attributes(rank: QUEEN, suit: DIAMONDS)
       end
     end
   end

@@ -16,12 +16,12 @@ class BiddingManager
     init_bidding(player_order: player_order, centre_card: centre_card, centre_card_suit: centre_card_suit)
     update_display(show_centre_card: true)
     bidding_round_one
-    return @bid unless @bid.nil?
+    return @bid unless @bid == :pass
 
     @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
     update_display(show_centre_card: false)
     bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [@centre_card_suit])
-    @bid
+    nil
   end
 
   private
@@ -46,28 +46,45 @@ class BiddingManager
 
   def bidding_round_one
     @player_order.each do |player|
-      response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
+      # response = player.bid_centre_card(card: @centre_card, suit: @centre_card_suit, dealer: player == @dealer)
+      response = player.decide_bid(
+        options: [@centre_card_suit],
+        card: @centre_card,
+        dealer: dealer_relationship_to(player)
+      )
       next if response[:bid] == :pass
 
-      @dealer.exchange_card(card: @centre_card, trumps: response[:bid])
+      @dealer.exchange_card!(card: @centre_card, trumps: response[:bid])
       handle_response(response, player)
-      break
+      return
+    end
+    @bid = :pass
+  end
+
+  def dealer_relationship_to(player)
+    if @dealer == player
+      :self
+    elsif (@team1.include?(@dealer) && @team1.include?(player)) || (@team2.include?(@dealer) && @team2.include?(player))
+      :partner
     end
   end
 
   def bidding_round_two(available_trumps)
     @player_order.each do |player|
-      response = player.bid_trumps(options: available_trumps)
+      # response = player.bid_trumps(options: available_trumps)
+      response = player.decide_bid(options: available_trumps)
       next if response[:bid] == :pass
 
       handle_response(response, player)
-      break
+      return
     end
+    @bid = :pass
   end
 
   def handle_response(response, player)
     @bid = response[:bid]
     @going_alone = response[:going_alone]
+
     determine_bidders_and_defenders(player)
     update_player_order(player)
     nil

@@ -12,13 +12,13 @@ class DisplayTricks
 
   def prepare(display_order:)
     @display_order = display_order
+    @col_width = calculate_col_width
   end
 
   def table(trumps:, tricks:, bidders:)
     @trumps = trumps
     @tricks = tricks
     @bidders = bidders
-    @col_width = calculate_col_width
 
     table = generate_trick_table
     puts table

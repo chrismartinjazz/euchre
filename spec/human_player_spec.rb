@@ -2,82 +2,72 @@
 
 require 'constants'
 require 'human_player'
+require 'human_player_bidding'
 require 'deck'
 require 'trick'
+require 'card'
 require 'helpers'
 
 RSpec.describe HumanPlayer do
-  context 'with a player and an empty hand' do
-    player = HumanPlayer.new(name: 'player')
-    it 'creates a player with the given name and an empty hand' do
-      expect(player.name).to eq 'player'
-      expect(player.hand).to eq []
+  let(:bidding) { instance_double(HumanPlayerBidding) }
+  let(:player) { HumanPlayer.new(name: 'player', bidding: bidding) }
+  let(:centre_card) { 'test card' }
+  let(:trumps) { 'test trumps' }
+
+  before do
+    allow(bidding).to receive(:name=)
+  end
+
+  it 'creates a player with a name and an empty hand' do
+    expect(player.name).to be_kind_of(String)
+    expect(player.hand).to be_kind_of(Array)
+    expect(player.hand.length).to eq 0
+  end
+
+  describe "#exchange_card!" do
+    it 'forwards #exchange_card! to bidding defaulting to the current hand if none is supplied' do
+      player.hand = ['test hand']
+
+      expect(bidding).to receive(:exchange_card!).with(card: centre_card, trumps: trumps, hand: player.hand)
+      player.exchange_card!(card: centre_card, trumps: trumps)
+    end
+
+    it 'forwards #exchange_card! to bidding with a supplied hand' do
+      supplied_hand = ['test supplied hand']
+
+      expect(bidding).to receive(:exchange_card!).with(card: centre_card, trumps: trumps, hand: supplied_hand)
+      player.exchange_card!(card: centre_card, trumps: trumps, hand: supplied_hand)
     end
   end
 
-  context 'with a standard deck, 5 cards dealt to player hand' do
-    player = HumanPlayer.new(name: 'player')
-    deck = Deck.new
-    player.hand = deck.deal(count: 5)
-    card = deck.draw_one
-    it 'successfully exchanges a card' do
-      silence do
-        allow(player).to receive(:gets).and_return('1')
-        discarded_card = player.exchange_card(card: card, trumps: CLUBS)
-        expect(discarded_card.suit).to eq CLUBS
-        expect(discarded_card.rank).to eq :'2'
-      end
+  describe "#decide_bid" do
+    let(:options) { 'test_options' }
+
+    it 'forwards #decide_bid to bidding, with the centre card defaulting to nil if none is supplied' do
+      expect(bidding).to receive(:decide_bid).with(options: options, card: nil)
+      player.decide_bid(options: options)
     end
 
-    it 'can pass on the centre card' do
-      silence do
-        allow(player).to receive(:gets).and_return('2', 'N')
-        response = player.bid_centre_card(card: card, suit: card.suit)
-        expect(response[:bid]).to eq :pass
-        expect(response[:going_alone]).to eq false
-      end
+    it 'forwards #decide_bid to bidding, including a centre card if one is supplied' do
+      expect(bidding).to receive(:decide_bid).with(options: options, card: centre_card)
+      player.decide_bid(options: options, card: centre_card)
     end
 
-    it 'can pick up the centre card' do
-      silence do
-        allow(player).to receive(:gets).and_return('1', 'N')
-        response = player.bid_centre_card(card: card, suit: card.suit)
-        expect(response[:bid]).to eq card.suit
-      end
-    end
-
-    it 'can pass when bidding trumps' do
-      silence do
-        allow(player).to receive(:gets).and_return('P', 'N')
-        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS, SPADES])
-        expect(response[:bid]).to eq :pass
-      end
-    end
-
-    it 'can bid for a valid suit (clubs)' do
-      silence do
-        allow(player).to receive(:gets).and_return('C', 'N')
-        response = player.bid_trumps(options: [CLUBS, DIAMONDS, HEARTS, SPADES])
-        expect(response[:bid]).to eq CLUBS
-      end
-    end
-
-    it 're-prompts if player inputs an invalid suit' do
-      silence do
-        allow(player).to receive(:gets).and_return('C', 'D', 'N')
-        response = player.bid_trumps(options: [DIAMONDS, HEARTS, SPADES])
-        expect(response[:bid]).to eq DIAMONDS
-      end
+    it 'ignores other keyword arguments and forwards only options: and card:' do
+      expect(bidding).to receive(:decide_bid).with(options: options, card: centre_card)
+      player.decide_bid(options: options, card: centre_card, other_kw_argument: nil)
     end
   end
 
   context 'when playing a trick' do
-    player = HumanPlayer.new(name: 'player')
-    deck = Deck.new(ranks: [NINE, TEN], suits: [CLUBS, DIAMONDS, HEARTS, SPADES], joker_count: 0)
-    player.hand = deck.deal(count: 5)
-    # Player is holding 9C 9D 9H 9S TC
-    trumps = CLUBS
-    tricks = Array.new(5) { Trick.new(trumps: trumps) }
+    before do
+      deck = Deck.new(ranks: [NINE, TEN], suits: [CLUBS, DIAMONDS, HEARTS, SPADES], joker_count: 0)
+      player.hand = deck.deal(count: 5)
+      # Player is holding 9C 9D 9H 9S TC
+    end
+
+    let(:trumps) { CLUBS }
+    let(:tricks) { Array.new(5) { Trick.new(trumps: trumps) } }
 
     it 'can choose the first card in hand to lead, when no other card has been played' do
       silence do
@@ -87,8 +77,7 @@ RSpec.describe HumanPlayer do
     end
 
     it 're-prompts on a card that does not follow suit' do
-      card = Card.new(rank: ACE, suit: DIAMONDS)
-      tricks[0].add(player: player, card: card)
+      tricks[0].add(player: player, card: Card.new(rank: ACE, suit: DIAMONDS))
       silence do
         allow(player).to receive(:gets).and_return('1', '2')
         expect(player.play_card(trumps: trumps, tricks: tricks, trick_index: 0)).to have_attributes(rank: NINE, suit: DIAMONDS)
@@ -97,21 +86,27 @@ RSpec.describe HumanPlayer do
   end
 
   context 'when clubs are trumps, and holding Joker, Jack Clubs, Jack Spades, Nine Clubs, Nine Spades' do
-    trumps = CLUBS
-    player1 = HumanPlayer.new(name: 'player1')
-    player2 = HumanPlayer.new(name: 'player2')
+    let(:trumps) { CLUBS }
+    let(:player1) { HumanPlayer.new(name: 'player1') }
+    let(:player2) { HumanPlayer.new(name: 'player2') }
 
-    joker = Card.new(rank: JOKER, suit: JOKER_SUIT)
-    jack_of_clubs = Card.new(rank: JACK, suit: CLUBS)
-    jack_of_spades = Card.new(rank: JACK, suit: SPADES)
-    nine_of_clubs = Card.new(rank: NINE, suit: CLUBS)
-    nine_of_spades = Card.new(rank: NINE, suit: SPADES)
+    let(:joker) { Card.new(rank: JOKER, suit: JOKER_SUIT) }
+    let(:jack_of_clubs) { Card.new(rank: JACK, suit: CLUBS) }
+    let(:jack_of_spades) { Card.new(rank: JACK, suit: SPADES) }
+    let(:nine_of_clubs) { Card.new(rank: NINE, suit: CLUBS) }
+    let(:nine_of_spades) { Card.new(rank: NINE, suit: SPADES) }
 
-    player2.hand = [joker, jack_of_clubs, jack_of_spades, nine_of_clubs, nine_of_spades]
-    tricks = Array.new(5) { Trick.new(trumps: trumps) }
+    let(:tricks) { Array.new(5) { Trick.new(trumps: trumps) } }
+
+    let(:ace_of_spaces) { Card.new(rank: ACE, suit: SPADES) }
+    let(:ace_of_clubs) { Card.new(rank: ACE, suit: CLUBS) }
+
+    before do
+      player2.hand = [joker, jack_of_clubs, jack_of_spades, nine_of_clubs, nine_of_spades]
+    end
+
     it 'only accepts Nine Spades if Ace of Spades is led' do
       # Trumps are clubs. Ace of spades is led. Player holds jack of spades, and may not play the joker or the jack of clubs.
-      ace_of_spaces = Card.new(rank: ACE, suit: SPADES)
       tricks[0].add(player: player1, card: ace_of_spaces)
       silence do
         allow(player2).to receive(:gets).and_return("1", "2", "3", "4", "5")
@@ -120,7 +115,6 @@ RSpec.describe HumanPlayer do
     end
 
     it 'accepts the Joker, Jack of Clubs and Jack of Spades if Ace of Clubs is led' do
-      ace_of_clubs = Card.new(rank: ACE, suit: CLUBS)
       tricks[0].add(player: player1, card: ace_of_clubs)
       silence do
         allow(player2).to receive(:gets).and_return("3")

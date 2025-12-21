@@ -4,37 +4,43 @@ require 'card'
 require 'constants'
 
 RSpec.describe Card do
+  let(:ten_of_diamonds) { Card.new(rank: TEN, suit: DIAMONDS) }
+  let(:queen_of_hearts) { Card.new(rank: QUEEN, suit: HEARTS) }
+  let(:jack_of_spades) { Card.new(rank: JACK, suit: SPADES) }
+  let(:ace_of_clubs) { Card.new(rank: ACE, suit: CLUBS) }
+  let(:joker) { Card.new(rank: JOKER, suit: JOKER_SUIT) }
+
   it 'creates card with expected rank and suit' do
-    card = Card.new(rank: TEN, suit: DIAMONDS)
-    expect(card.rank).to eq TEN
-    expect(card.suit).to eq DIAMONDS
+    expect(ten_of_diamonds.rank).to eq TEN
+    expect(ten_of_diamonds.suit).to eq DIAMONDS
   end
 
-  it 'gives a string representation of the card in expected format' do
-    ten_of_diamonds = Card.new(rank: TEN, suit: DIAMONDS)
+  it 'gives a string representation of cards in expected format' do
     expect(ten_of_diamonds.to_s).to eq "T\e[31m♦\e[0m"
-
-    queen_of_hearts = Card.new(rank: QUEEN, suit: HEARTS)
     expect(queen_of_hearts.to_s).to eq "Q\e[31m♥\e[0m"
-
-    jack_of_spades = Card.new(rank: JACK, suit: SPADES)
     expect(jack_of_spades.to_s).to eq 'J♠'
-
-    ace_of_clubs = Card.new(rank: ACE, suit: CLUBS)
     expect(ace_of_clubs.to_s).to eq 'A♣'
-
-    joker = Card.new(rank: JOKER, suit: JOKER_SUIT)
     expect(joker.to_s).to eq '?J'
   end
 
-  it 'reports its own suit, based on which suit is trumps, following the rules of euchre' do
-    joker = Card.new(rank: JOKER, suit: JOKER_SUIT)
-    expect(joker.suit).to eq JOKER_SUIT
-    expect(joker.suit(trumps: DIAMONDS)).to eq DIAMONDS
+  context 'jack of spades' do
+    it 'correctly reports its rank, with respect to the trump suit, handling left bower' do
+      expect(jack_of_spades.rank(trumps: SPADES)).to eq JACK
+      expect(jack_of_spades.rank(trumps: CLUBS)).to eq LEFT_BOWER
+      expect(jack_of_spades.rank(trumps: HEARTS)).to eq JACK
+    end
 
-    jack_of_diamonds = Card.new(rank: JACK, suit: DIAMONDS)
-    expect(jack_of_diamonds.suit).to eq DIAMONDS
-    expect(jack_of_diamonds.suit(trumps: DIAMONDS)).to eq DIAMONDS
-    expect(jack_of_diamonds.suit(trumps: HEARTS)).to eq HEARTS
+    it 'correctly reports its suit, with respect to the trump suit, handling left bower' do
+      expect(jack_of_spades.suit(trumps: SPADES)).to eq SPADES
+      expect(jack_of_spades.suit(trumps: CLUBS)).to eq SPADES
+      expect(jack_of_spades.suit(trumps: HEARTS)).to eq SPADES
+    end
+  end
+
+  context 'joker' do
+    it 'correctly reports its suit with respect to the trump suit (i.e., it is always trumps)' do
+      expect(joker.suit).to eq JOKER_SUIT
+      expect(joker.suit(trumps: DIAMONDS)).to eq DIAMONDS
+    end
   end
 end

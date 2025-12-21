@@ -161,3 +161,20 @@ announce the winners
 exit the game loop
 Clear the table
 Reset all players hands to be empty
+
+## Refactoring
+
+ComputerPlayer object:
+
+Should combine the bid_centre_card and the bid_trumps methods into a single method: bid(options:, dealer: false, card: nil)
+
+- Interface:
+  - #bid_centre_card(card:, suit:, dealer:)
+    - #score_hand (currently takes suit, hand - adapt to cope with an extra card)
+    - #announce (move to @display, and make it )
+    - Potential other methods to extract:
+    - #determine_bid(score, suit) - this would go in ComputerPlayer class
+    - #announce_bid(bid, suit, dealer)
+  - #bid_trumps(options:)
+    - #score_hand (needs to handle multiple options)
+    - #announce (move to @display)

@@ -16,16 +16,17 @@ RSpec.describe Display do
     south = HumanPlayer.new(name: "South")
     west = ComputerPlayer.new(name: "West")
     players = [south, west, north, east]
+    team1 = [north, south]
+    team2 = [east, west]
+    score = {team1 => 6, team2 => 7}
     deck = Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
     players.each { |player| player.add_to_hand(cards: deck.deal(count: 5)) }
 
     display = Display.new
+    display.prepare(teams: [team1, team2], display_order: players, score: score)
     it "displays the scoreboard as expected" do
-      teams = [[north, south], [east, west]]
-      team1, team2 = teams
-      score = {team1 => 6, team2 => 7}
       silence do
-        result = display.score(teams: teams, score: score)
+        result = display.score
         expect(result).to eq nil
       end
     end
@@ -34,7 +35,7 @@ RSpec.describe Display do
       centre_card = deck.draw_one
       silence do
         puts
-        result = display.players(dealer: north, centre_card: centre_card, centre_card_suit: centre_card.suit, players: players)
+        result = display.players(dealer: north, centre_card: centre_card, centre_card_suit: centre_card.suit)
         expect(result).to eq nil
       end
     end
@@ -43,7 +44,7 @@ RSpec.describe Display do
       centre_card = Card.new(rank: JOKER, suit: JOKER_SUIT)
       silence do
         puts
-        result = display.players(dealer: east, centre_card: centre_card, centre_card_suit: DIAMONDS, players: players)
+        result = display.players(dealer: east, centre_card: centre_card, centre_card_suit: DIAMONDS)
         expect(result).to eq nil
       end
     end
@@ -55,8 +56,7 @@ RSpec.describe Display do
         result = display.tricks(
           trumps: CLUBS,
           tricks: tricks,
-          bidders: [north, south],
-          players: [south, west, north, east]
+          bidders: [north, south]
         )
         expect(result).to eq nil
       end
@@ -75,8 +75,7 @@ RSpec.describe Display do
         result = display.tricks(
           trumps: CLUBS,
           tricks: tricks,
-          bidders: [east, west],
-          players: [south, west, north, east]
+          bidders: [east, west]
         )
         expect(result).to eq nil
       end

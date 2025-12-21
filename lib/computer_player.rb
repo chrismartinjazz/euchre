@@ -1,83 +1,58 @@
 # frozen_string_literal: true
 
 require_relative 'constants'
+require_relative 'modules/computer_player_helpers'
 require_relative 'player'
+require_relative 'computer_player_bidding'
 
 # A computer player.
 class ComputerPlayer < Player
-  BID_MIN_SCORE = 6.5
-  GO_ALONE_MIN_SCORE = 9.5
+  include ComputerPlayerHelpers
 
   def initialize(name: 'Unknown')
+    @bidding = ComputerPlayerBidding.new(name: name)
     super
   end
 
-  def bid_centre_card(card:, suit:, dealer:)
-    hand = @hand.dup
-    hand.push(card) if dealer
-
-    score = score_hand(suit, hand)
-    announce("[score #{score}]") if DISPLAY_THINKING
-
-    bid = score >= BID_MIN_SCORE ? suit : :pass
-    going_alone = score >= GO_ALONE_MIN_SCORE && bid != :pass
-
-    bid_text = if bid == suit && dealer
-                 'I pick it up.'
-               elsif bid == suit && !dealer
-                 'Pick it up.'
-               else
-                 'Pass.'
-               end
-    go_alone_text = going_alone ? "I'll go alone." : ''
-    announce([bid_text, go_alone_text])
-
-    {bid: bid, going_alone: going_alone}
+  def decide_bid(options:, hand: nil, card: nil, dealer: nil)
+    my_hand = @hand if hand.nil?
+    @bidding.decide_bid(hand: my_hand, options: options, card: card, dealer: dealer)
   end
 
-  def bid_trumps(options:)
-    scores = {}
-    options.each { |suit| scores[suit] = score_hand(suit) }
-    best_suit, score = scores.max_by { |_k, v| v }
-    announce("[score #{score}]") if DISPLAY_THINKING
-
-    bid = score >= BID_MIN_SCORE ? best_suit : :pass
-    going_alone = score >= GO_ALONE_MIN_SCORE && bid != :pass
-
-    bid_text = bid == :pass ? 'Pass' : "I bid #{SUITS[bid][:text]}."
-    go_alone_text = going_alone ? "I'll go alone." : ''
-    announce([bid_text, go_alone_text])
-
-    {bid: bid, going_alone: going_alone}
+  def exchange_card!(card:, trumps:, hand: nil)
+    my_hand = @hand if hand.nil?
+    @bidding.exchange_card!(card: card, trumps: trumps, hand: my_hand)
   end
 
-  def exchange_card(card:, trumps:)
-    @hand.push(card)
-    card_scores = @hand.map { |card| evaluate_card(card, trumps) }
-    index = card_scores.find_index(card_scores.min)
-
-    announce('(Picks up the centre card and exchanges it with a card from their hand)')
-
-    @hand.delete_at(index)
+  def choose_a_suit
+    @bidding.choose_a_suit
   end
 
   def play_card(trumps:, tricks:, trick_index:)
     valid_hand_indices = find_valid_hand_indices(trumps, tricks, trick_index)
-    scores = {}
-    valid_hand_indices.each { |index| scores[index] = evaluate_card(@hand[index], trumps) }
-    index = scores.max_by { |_k, v| v }[0]
-
-    announce(scores) if DISPLAY_THINKING
-    announce(@hand[index].to_s)
-
+    index = choose_card(valid_hand_indices, trumps, tricks[trick_index])
+    announce(@name, @hand[index].to_s, confirmation: true)
     @hand.delete_at(index)
   end
 
-  def choose_a_suit
-    suits = SUITS.keys.reject { |suit| suit == JOKER_SUIT }
-    suit = suits[rand(suits.size)]
-    announce(SUITS[suit][:text])
-    suit
+  def choose_card(valid_hand_indices, trumps, trick)
+    scores = {}
+    valid_hand_indices.each { |index| scores[index] = evaluate_card(@hand[index], trumps) }
+    # If the strongest card in my hand can't win the trick, play the weakest available card.
+    # If my partner is already winning the trick with a trump Ace or higher, play weakest available.
+    index_of_my_strongest_card = scores.max_by { |_k, v| v }[0]
+    index_of_my_weakest_card = scores.min_by { |_k, v| v }[0]
+    current_winning_card = trick.winning_play ? trick.winning_play[:card] : nil
+    i_can_win_trick = evaluate_card(current_winning_card, trumps) < scores[index_of_my_strongest_card]
+
+    if DISPLAY_THINKING
+      announce(
+        @name,
+        "scores: #{scores}, strongest: #{index_of_my_strongest_card}, weakest: #{index_of_my_weakest_card}" \
+        "current winning card: #{current_winning_card}, i can win trick: #{i_can_win_trick}"
+      )
+    end
+    i_can_win_trick ? index_of_my_strongest_card : index_of_my_weakest_card
   end
 
   private
@@ -99,15 +74,11 @@ class ComputerPlayer < Player
   end
 
   def evaluate_card(card, trumps)
+    return 0 if card.nil?
+
     suit = card.suit(trumps: trumps)
     rank = card.rank(trumps: trumps)
 
     suit == trumps ? 6 + RANKS[:trumps].find_index(rank) : RANKS[:non_trumps].find_index(rank)
-  end
-
-  def announce(input)
-    string = input.is_a?(Array) ? input.join(' ') : input
-    puts "\n#{@name}: #{string}"
-    sleep(THINKING_TIME)
   end
 end
