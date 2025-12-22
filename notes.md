@@ -28,7 +28,7 @@
   - [x] computer_player_bidding_spec.rb
   - [x] human_player_bidding_spec.rb
   - [x] display_spec.rb
-- [ ] Adjust Card to be an object factory rather than handling jokers and bowers internally
+- [x] Adjust Card to be an object factory rather than handling jokers and bowers internally
 
 ## Classes
 
