@@ -11,19 +11,19 @@ RSpec.describe Trick do
   let(:north) { 'test north' }
   let(:east) { 'test east' }
 
-  let(:nine_of_diamonds) { Card.new(rank: NINE, suit: DIAMONDS) }
-  let(:ten_of_diamonds) { Card.new(rank: TEN, suit: DIAMONDS) }
-  let(:king_of_diamonds) { Card.new(rank: KING, suit: DIAMONDS) }
+  let(:nine_of_diamonds) { Card.for(rank: NINE, suit: DIAMONDS) }
+  let(:ten_of_diamonds) { Card.for(rank: TEN, suit: DIAMONDS) }
+  let(:king_of_diamonds) { Card.for(rank: KING, suit: DIAMONDS) }
 
-  let(:ten_of_spades) { Card.new(rank: TEN, suit: SPADES) }
-  let(:jack_of_spades) { Card.new(rank: JACK, suit: SPADES) }
-  let(:ace_of_spades) { Card.new(rank: ACE, suit: SPADES) }
+  let(:ten_of_spades) { Card.for(rank: TEN, suit: SPADES) }
+  let(:jack_of_spades) { Card.for(rank: JACK, suit: SPADES) }
+  let(:ace_of_spades) { Card.for(rank: ACE, suit: SPADES) }
 
-  let(:nine_of_clubs) { Card.new(rank: NINE, suit: CLUBS) }
-  let(:jack_of_clubs) { Card.new(rank: JACK, suit: CLUBS) }
-  let(:ace_of_clubs) { Card.new(rank: ACE, suit: CLUBS) }
+  let(:nine_of_clubs) { Card.for(rank: NINE, suit: CLUBS) }
+  let(:jack_of_clubs) { Card.for(rank: JACK, suit: CLUBS) }
+  let(:ace_of_clubs) { Card.for(rank: ACE, suit: CLUBS) }
 
-  let(:joker) { Card.new(rank: JOKER, suit: JOKER_SUIT) }
+  let(:joker) { Card.for(rank: JOKER, suit: JOKER_SUIT) }
 
   context 'when clubs are trumps and all four players are playing' do
     let(:trumps) { CLUBS }

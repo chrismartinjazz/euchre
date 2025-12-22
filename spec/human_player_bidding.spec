@@ -9,15 +9,15 @@ RSpec.describe HumanPlayerBidding do
   let(:human_player_bidding) { HumanPlayerBidding.new }
   context 'with a strong clubs hand (9C, TC, QC, KC, JS) and a Jack of Clubs as centre card' do
     let(:hand) { [
-      Card.new(rank: NINE, suit: CLUBS),
-      Card.new(rank: TEN, suit: CLUBS),
-      Card.new(rank: QUEEN, suit: CLUBS),
-      Card.new(rank: KING, suit: CLUBS),
-      Card.new(rank: JACK, suit: SPADES)
+      Card.for(rank: NINE, suit: CLUBS),
+      Card.for(rank: TEN, suit: CLUBS),
+      Card.for(rank: QUEEN, suit: CLUBS),
+      Card.for(rank: KING, suit: CLUBS),
+      Card.for(rank: JACK, suit: SPADES)
     ] }
-    let(:centre_card) { Card.new(rank: JACK, suit: CLUBS) }
+    let(:centre_card) { Card.for(rank: JACK, suit: CLUBS) }
 
-    let(:nine_of_diamonds) { Card.new(rank: NINE, suit: DIAMONDS) }
+    let(:nine_of_diamonds) { Card.for(rank: NINE, suit: DIAMONDS) }
 
     it 'successfully exchanges a card' do
       silence do
@@ -33,7 +33,7 @@ RSpec.describe HumanPlayerBidding do
     it 'successfully chooses a suit, re-prompting if given invalid input' do
       silence do
         allow(human_player_bidding).to receive(:gets).and_return('1', 'C')
-        suit = human_player_bidding.choose_suit
+        suit = human_player_bidding.choose_a_suit
 
         expect(suit).to eq CLUBS
       end

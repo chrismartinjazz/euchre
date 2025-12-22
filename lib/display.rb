@@ -11,7 +11,7 @@ class Display
     @display_score = DisplayScore.new
     @display_players = DisplayPlayers.new
     @display_tricks = DisplayTricks.new
-    @face_down_card = Card.new(rank: '', suit: '')
+    @face_down_card = Card.for(rank: '', suit: '')
   end
 
   def prepare(display_order:, teams:, score:)

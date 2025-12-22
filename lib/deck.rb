@@ -32,10 +32,10 @@ class Deck
     cards = []
     @ranks.each do |rank|
       @suits.each do |suit|
-        cards.push(Card.new(rank: rank, suit: suit))
+        cards.push(Card.for(rank: rank, suit: suit))
       end
     end
-    @joker_count.times { cards.push(Card.new(rank: JOKER, suit: JOKER_SUIT)) }
+    @joker_count.times { cards.push(Card.for(rank: JOKER, suit: JOKER_SUIT)) }
     cards
   end
 end

@@ -73,6 +73,13 @@ RSpec.describe ComputerPlayer do
     end
   end
 
+  describe '#choose_a_suit' do
+    it 'forwards the #choose_a_suit message to computer_player_bidding' do
+      expect(computer_player_bidding).to receive(:choose_a_suit)
+      player.choose_a_suit
+    end
+  end
+
   describe '#play_card' do
     it 'forwards #play_card to computer_player_tricks defaulting to current hand if none is supplied' do
       player.hand = 'test player hand'

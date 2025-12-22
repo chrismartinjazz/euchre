@@ -42,7 +42,7 @@ RSpec.describe Display do
     end
   end
   it "displays the bidding hands with east as dealer and a joker turned up as centre card" do
-    centre_card = Card.new(rank: JOKER, suit: JOKER_SUIT)
+    centre_card = Card.for(rank: JOKER, suit: JOKER_SUIT)
     silence do
       puts
       result = display.players(dealer: east, centre_card: centre_card, centre_card_suit: DIAMONDS)
@@ -63,12 +63,12 @@ RSpec.describe Display do
 
   it "displays trick progress indicating the winning card in the round (to that point) and the trick winner, if there is one." do
     tricks = Array.new(5) { Trick.new(trumps: CLUBS) }
-    tricks[0].add(player: south, card: Card.new(rank: TEN, suit: DIAMONDS))
-    tricks[0].add(player: west, card: Card.new(rank: JACK, suit: CLUBS))
-    tricks[0].add(player: north, card: Card.new(rank: ACE, suit: DIAMONDS))
-    tricks[0].add(player: east, card: Card.new(rank: JACK, suit: SPADES))
-    tricks[1].add(player: east, card: Card.new(rank: ACE, suit: SPADES))
-    tricks[1].add(player: south, card: Card.new(rank: JOKER, suit: JOKER_SUIT))
+    tricks[0].add(player: south, card: Card.for(rank: TEN, suit: DIAMONDS))
+    tricks[0].add(player: west, card: Card.for(rank: JACK, suit: CLUBS))
+    tricks[0].add(player: north, card: Card.for(rank: ACE, suit: DIAMONDS))
+    tricks[0].add(player: east, card: Card.for(rank: JACK, suit: SPADES))
+    tricks[1].add(player: east, card: Card.for(rank: ACE, suit: SPADES))
+    tricks[1].add(player: south, card: Card.for(rank: JOKER, suit: JOKER_SUIT))
     silence do
       puts
       result = display.tricks(

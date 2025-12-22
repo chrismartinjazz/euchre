@@ -14,11 +14,11 @@ RSpec.describe ComputerPlayerTricks do
 
   let(:computer_player_tricks) { ComputerPlayerTricks.new }
   let(:hand) { [
-    Card.new(rank: JACK, suit: DIAMONDS),
-    Card.new(rank: ACE, suit: DIAMONDS),
-    Card.new(rank: KING, suit: DIAMONDS),
-    Card.new(rank: QUEEN, suit: DIAMONDS),
-    Card.new(rank: TEN, suit: SPADES)
+    Card.for(rank: JACK, suit: DIAMONDS),
+    Card.for(rank: ACE, suit: DIAMONDS),
+    Card.for(rank: KING, suit: DIAMONDS),
+    Card.for(rank: QUEEN, suit: DIAMONDS),
+    Card.for(rank: TEN, suit: SPADES)
   ] }
   let(:trumps) { DIAMONDS }
   let(:tricks) { Array.new(5) { Trick.new(trumps: trumps) } }
@@ -37,7 +37,7 @@ RSpec.describe ComputerPlayerTricks do
       end
 
       it 'follows suit if a spade is led' do
-        tricks[0].add(player: computer_player_tricks, card: Card.new(rank: ACE, suit: SPADES))
+        tricks[0].add(player: computer_player_tricks, card: Card.for(rank: ACE, suit: SPADES))
         silence do
           expect(computer_player_tricks.play_card(
             trumps: trumps,
@@ -49,7 +49,7 @@ RSpec.describe ComputerPlayerTricks do
       end
 
       it 'plays the weakest valid card, if it cannot win the trick' do
-        tricks[1].add(player: computer_player_tricks, card: Card.new(rank: JOKER, suit: JOKER_SUIT))
+        tricks[1].add(player: computer_player_tricks, card: Card.for(rank: JOKER, suit: JOKER_SUIT))
         silence do
           expect(computer_player_tricks.play_card(
             trumps: trumps,

@@ -25,8 +25,8 @@ class HumanPlayer < Player
     @bidding.exchange_card!(hand: my_hand, card: card, trumps: trumps)
   end
 
-  def choose_suit
-    @bidding.choose_suit
+  def choose_a_suit
+    @bidding.choose_a_suit
   end
 
   def play_card(trumps:, tricks:, trick_index:, hand: nil)

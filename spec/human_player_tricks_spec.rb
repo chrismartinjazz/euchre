@@ -14,11 +14,11 @@ RSpec.describe HumanPlayerTricks do
   context 'when holding JD, AD, KD, QD, TS and Diamonds are trumps' do
     let(:trumps) { DIAMONDS }
     let(:hand) { [
-      Card.new(rank: JACK, suit: DIAMONDS),
-      Card.new(rank: ACE, suit: DIAMONDS),
-      Card.new(rank: KING, suit: DIAMONDS),
-      Card.new(rank: QUEEN, suit: DIAMONDS),
-      Card.new(rank: TEN, suit: SPADES)
+      Card.for(rank: JACK, suit: DIAMONDS),
+      Card.for(rank: ACE, suit: DIAMONDS),
+      Card.for(rank: KING, suit: DIAMONDS),
+      Card.for(rank: QUEEN, suit: DIAMONDS),
+      Card.for(rank: TEN, suit: SPADES)
     ] }
 
     it 'can choose the first card in hand to lead (JD), when no other card has been played' do
@@ -34,7 +34,7 @@ RSpec.describe HumanPlayerTricks do
     end
 
     it 're-prompts on a card that does not follow suit (AS played, re-prompts on JD, allows TS)' do
-      tricks[0].add(player: human_player_tricks, card: Card.new(rank: ACE, suit: SPADES))
+      tricks[0].add(player: human_player_tricks, card: Card.for(rank: ACE, suit: SPADES))
       silence do
         allow(human_player_tricks).to receive(:gets).and_return('1', '5')
         expect(human_player_tricks.play_card(
@@ -50,15 +50,15 @@ RSpec.describe HumanPlayerTricks do
   context 'when holding ?J, JC, JS, 9C, 9S and clubs are trumps' do
     let(:trumps) { CLUBS }
     let(:hand) { [
-      Card.new(rank: JOKER, suit: JOKER_SUIT),
-      Card.new(rank: JACK, suit: CLUBS),
-      Card.new(rank: JACK, suit: SPADES),
-      Card.new(rank: NINE, suit: CLUBS),
-      Card.new(rank: NINE, suit: SPADES)
+      Card.for(rank: JOKER, suit: JOKER_SUIT),
+      Card.for(rank: JACK, suit: CLUBS),
+      Card.for(rank: JACK, suit: SPADES),
+      Card.for(rank: NINE, suit: CLUBS),
+      Card.for(rank: NINE, suit: SPADES)
     ] }
 
     it 'accepts the Joker if Ace of Clubs is led' do
-      tricks[0].add(player: 'test player', card: Card.new(rank: ACE, suit: CLUBS))
+      tricks[0].add(player: 'test player', card: Card.for(rank: ACE, suit: CLUBS))
       silence do
         allow(human_player_tricks).to receive(:gets).and_return("1")
         expect(human_player_tricks.play_card(
@@ -71,7 +71,7 @@ RSpec.describe HumanPlayerTricks do
     end
 
     it 'accepts the Jack of Clubs if Ace of Clubs is led' do
-      tricks[0].add(player: 'test player', card: Card.new(rank: ACE, suit: CLUBS))
+      tricks[0].add(player: 'test player', card: Card.for(rank: ACE, suit: CLUBS))
       silence do
         allow(human_player_tricks).to receive(:gets).and_return("2")
         expect(human_player_tricks.play_card(
@@ -84,7 +84,7 @@ RSpec.describe HumanPlayerTricks do
     end
 
     it 'accepts the Jack of Spades if Ace of Clubs is led' do
-      tricks[0].add(player: 'test player', card: Card.new(rank: ACE, suit: CLUBS))
+      tricks[0].add(player: 'test player', card: Card.for(rank: ACE, suit: CLUBS))
       silence do
         allow(human_player_tricks).to receive(:gets).and_return("3")
         expect(human_player_tricks.play_card(

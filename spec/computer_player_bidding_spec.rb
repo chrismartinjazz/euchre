@@ -11,17 +11,26 @@ RSpec.describe ComputerPlayerBidding do
   end
 
   let(:computer_player_bidding) { ComputerPlayerBidding.new }
-  let(:ten_of_clubs) { Card.new(rank: TEN, suit: CLUBS) }
-  let(:ten_of_diamonds) { Card.new(rank: TEN, suit: DIAMONDS) }
-  let(:queen_of_hearts) { Card.new(rank: QUEEN, suit: HEARTS) }
+  let(:ten_of_clubs) { Card.for(rank: TEN, suit: CLUBS) }
+  let(:ten_of_diamonds) { Card.for(rank: TEN, suit: DIAMONDS) }
+  let(:queen_of_hearts) { Card.for(rank: QUEEN, suit: HEARTS) }
+
+  describe '#choose_a_suit' do
+    it 'chooses a valid suit' do
+      silence do
+        result = computer_player_bidding.choose_a_suit
+        expect([CLUBS, DIAMONDS, HEARTS, SPADES].include?(result)).to eq true
+      end
+    end
+  end
 
   context "with a strong clubs hand" do
     let(:hand) { [
-      Card.new(rank: JOKER, suit: JOKER_SUIT),
-      Card.new(rank: JACK, suit: CLUBS),
-      Card.new(rank: JACK, suit: SPADES),
-      Card.new(rank: ACE, suit: CLUBS),
-      Card.new(rank: ACE, suit: SPADES)
+      Card.for(rank: JOKER, suit: JOKER_SUIT),
+      Card.for(rank: JACK, suit: CLUBS),
+      Card.for(rank: JACK, suit: SPADES),
+      Card.for(rank: ACE, suit: CLUBS),
+      Card.for(rank: ACE, suit: SPADES)
     ] }
 
     it 'orders up centre_card if it is a club, regardless of who is the dealer' do
@@ -89,11 +98,11 @@ RSpec.describe ComputerPlayerBidding do
 
   context 'with a borderline hearts hand (Jack DIAMONDS, Ten HEARTS, Ace SPACES, Jack CLUBS, Nine SPADES)' do
     let(:hand) { [
-      Card.new(rank: JACK, suit: DIAMONDS),
-      Card.new(rank: TEN, suit: HEARTS),
-      Card.new(rank: ACE, suit: SPADES),
-      Card.new(rank: JACK, suit: CLUBS),
-      Card.new(rank: NINE, suit: SPADES)
+      Card.for(rank: JACK, suit: DIAMONDS),
+      Card.for(rank: TEN, suit: HEARTS),
+      Card.for(rank: ACE, suit: SPADES),
+      Card.for(rank: JACK, suit: CLUBS),
+      Card.for(rank: NINE, suit: SPADES)
     ] }
 
     it 'does not order up hearts unless can pick up a heart centre card as dealer (this hand is only just good enough to bid)' do
@@ -126,11 +135,11 @@ RSpec.describe ComputerPlayerBidding do
 
   context 'with a hand with no off-trump singles' do
     let(:hand) { [
-      Card.new(rank: JOKER, suit: JOKER_SUIT),
-      Card.new(rank: JACK, suit: SPADES),
-      Card.new(rank: JACK, suit: CLUBS),
-      Card.new(rank: KING, suit: HEARTS),
-      Card.new(rank: TEN, suit: HEARTS)
+      Card.for(rank: JOKER, suit: JOKER_SUIT),
+      Card.for(rank: JACK, suit: SPADES),
+      Card.for(rank: JACK, suit: CLUBS),
+      Card.for(rank: KING, suit: HEARTS),
+      Card.for(rank: TEN, suit: HEARTS)
     ] }
     it 'chooses the worst card to discard, correctly handling left bower' do
       silence do

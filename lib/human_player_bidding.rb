@@ -35,7 +35,7 @@ class HumanPlayerBidding
     @hand.delete_at(index)
   end
 
-  def choose_suit
+  def choose_a_suit
     prompt = 'Choose a suit for the centre card: Clubs (C), Diamonds (D), Hearts (H) or Spades (S): '
     valid_input = %w[C D H S]
     get_player_input(@name, prompt, valid_input).to_sym

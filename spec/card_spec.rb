@@ -4,11 +4,11 @@ require 'card'
 require 'constants'
 
 RSpec.describe Card do
-  let(:ten_of_diamonds) { Card.new(rank: TEN, suit: DIAMONDS) }
-  let(:queen_of_hearts) { Card.new(rank: QUEEN, suit: HEARTS) }
-  let(:jack_of_spades) { Card.new(rank: JACK, suit: SPADES) }
-  let(:ace_of_clubs) { Card.new(rank: ACE, suit: CLUBS) }
-  let(:joker) { Card.new(rank: JOKER, suit: JOKER_SUIT) }
+  let(:ten_of_diamonds) { Card.for(rank: TEN, suit: DIAMONDS) }
+  let(:queen_of_hearts) { Card.for(rank: QUEEN, suit: HEARTS) }
+  let(:jack_of_spades) { Card.for(rank: JACK, suit: SPADES) }
+  let(:ace_of_clubs) { Card.for(rank: ACE, suit: CLUBS) }
+  let(:joker) { Card.for(rank: JOKER, suit: JOKER_SUIT) }
 
   it 'creates card with expected rank and suit' do
     expect(ten_of_diamonds.rank).to eq TEN
