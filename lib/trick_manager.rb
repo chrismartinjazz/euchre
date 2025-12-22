@@ -19,11 +19,11 @@ class TrickManager
   end
 
   def play_hand(trumps:, going_alone:, bidders:, defenders:, player_order:)
-    init_hand(trumps: trumps, going_alone: going_alone, bidders: bidders, defenders: defenders, player_order: player_order)
+    init_hand(
+      trumps: trumps, going_alone: going_alone, bidders: bidders, defenders: defenders, player_order: player_order
+    )
     HAND_SIZE.times do |index|
       play_trick(index)
-      @trick_score += 1 if bidders_win_trick?(index)
-      @display.message(message: "#{@tricks[index].winner} wins the trick.", confirmation: true)
       rotate_player_order_to_start_with(@tricks[index].winner)
     end
 
@@ -53,6 +53,8 @@ class TrickManager
       @tricks[index].add(player: player, card: card)
     end
     update_display
+    @trick_score += 1 if bidders_win_trick?(index)
+    @display.message(message: "#{@tricks[index].winner} wins the trick.", confirmation: true)
   end
 
   def update_display

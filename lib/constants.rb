@@ -58,4 +58,4 @@ SUITS = {
 }.freeze
 
 # Utility
-ANSI_ESCAPE = /\e\[[0-9;]*m/
+ANSI_ESCAPE = /\e\[[0-9;]*m/.freeze

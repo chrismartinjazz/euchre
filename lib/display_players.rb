@@ -89,7 +89,7 @@ class DisplayPlayers
   end
 
   def left_justify(text)
-    my_text, my_col_width, my_length = justify_parameters(text)
+    my_text, my_col_width, _my_length = justify_parameters(text)
     space_after = ' ' * [(my_col_width - my_text.length), 0].max
     safe_join([my_text, space_after], my_col_width)
   end
@@ -102,7 +102,7 @@ class DisplayPlayers
   end
 
   def right_justify(text)
-    my_text, my_col_width, my_length = justify_parameters(text)
+    my_text, my_col_width, _my_length = justify_parameters(text)
     space_before = ' ' * [(my_col_width - my_text.length), 0].max
     safe_join([space_before, my_text], my_col_width)
   end

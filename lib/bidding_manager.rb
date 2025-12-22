@@ -47,15 +47,13 @@ class BiddingManager
   def bidding_round_one
     @player_order.each do |player|
       response = player.decide_bid(
-        options: [@centre_card_suit],
-        card: @centre_card,
-        dealer: dealer_relationship_to(player)
+        options: [@centre_card_suit], card: @centre_card, dealer: dealer_relationship_to(player)
       )
       next if response[:bid] == :pass
 
       @dealer.exchange_card!(card: @centre_card, trumps: response[:bid])
       handle_response(response, player)
-      return
+      return nil
     end
     @bid = :pass
   end
@@ -74,7 +72,7 @@ class BiddingManager
       next if response[:bid] == :pass
 
       handle_response(response, player)
-      return
+      return nil
     end
     @bid = :pass
   end

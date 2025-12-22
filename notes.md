@@ -21,9 +21,14 @@
 - [x] Fix bug where going alone means play only against own team mate! (Opposite of intended behaviour)
 - [x] Adjust display initialization to make it clearer
 - [x] Update ComputerPlayer AI and fine tune, add more card playing logic.
-- [ ] Refactor ComputerPlayer (and then HumanPlayer) so it is all at the same level of abstraction - add a ComputerPlayerTricks class
-- [ ] Update all the tests to make them consistent in formatting, use of instance doubles
-- [ ] ComputerPlayer move THINKING_TIME to a class instance variable.
+- [x] Refactor ComputerPlayer (and then HumanPlayer) so it is all at the same level of abstraction - add a ComputerPlayerTricks class
+- [x] ComputerPlayer move THINKING_TIME out of tests.
+- [x] Update all the tests to make them consistent in formatting, use of instance doubles
+  - [x] trick_spec.rb
+  - [x] computer_player_bidding_spec.rb
+  - [x] human_player_bidding_spec.rb
+  - [x] display_spec.rb
+- [ ] Adjust Card to be an object factory rather than handling jokers and bowers internally
 
 ## Classes
 
@@ -59,7 +64,7 @@
 - Evaluates hands based on average of card numerical value, considering trump suit
 - Plays the strongest valid card in every trick context
 - Adjustments needed:
-  - [ ] Add awareness of context influencing playing of cards and bidding
+  - [x] Add awareness of context influencing playing of cards and bidding
     - [x] If the strongest card in hand can't win the trick, play the weakest valid card instead
     - [x] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
     - [x] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.

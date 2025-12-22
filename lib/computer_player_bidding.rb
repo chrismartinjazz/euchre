@@ -32,7 +32,8 @@ class ComputerPlayerBidding
   def exchange_card!(card:, trumps:, hand:)
     hand.push(card)
     off_trump_single = find_worst_off_trump_single(hand, trumps) # ?J, JC, JS, AC, *AS*, KC
-    off_trump_single ? hand.delete_at(hand.find_index(off_trump_single)) : hand.delete_at(worst_card_index(hand, trumps))
+    discard_index = off_trump_single ? hand.find_index(off_trump_single) : worst_card_index(hand, trumps)
+    hand.delete_at(discard_index)
   end
 
   def choose_a_suit

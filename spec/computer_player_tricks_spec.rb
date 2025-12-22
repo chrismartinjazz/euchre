@@ -6,9 +6,12 @@ require 'constants'
 require 'card'
 require 'trick'
 
-THINKING_TIME = 0
-
 RSpec.describe ComputerPlayerTricks do
+  before do
+    allow_any_instance_of(ComputerPlayerTricks).to receive(:think)
+    allow_any_instance_of(ComputerPlayerTricks).to receive(:wait_for_user_to_press_enter)
+  end
+
   let(:computer_player_tricks) { ComputerPlayerTricks.new }
   let(:hand) { [
     Card.new(rank: JACK, suit: DIAMONDS),

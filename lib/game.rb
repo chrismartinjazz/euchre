@@ -9,24 +9,19 @@ require_relative 'trick_manager'
 require_relative 'bidding_manager'
 require_relative 'score_manager'
 
+Players = Struct.new(:south, :west, :north, :east, :team1, :team2)
+
 # The game.
 class Game
   def initialize
-    south = HumanPlayer.new(name: 'South')
-    west = ComputerPlayer.new(name: 'West')
-    north = ComputerPlayer.new(name: 'North')
-    east = ComputerPlayer.new(name: 'East')
-    @display_order = [south, west, north, east].freeze
-    team1 = [south, north]
-    team2 = [east, west]
-
-    @display = Display.new
-    @deal_manager = DealManager.new(display: @display, player_order: @display_order.dup, dealer: east)
-    @bidding_manager = BiddingManager.new(display: @display, team1: team1, team2: team2)
-    @trick_manager = TrickManager.new(display: @display)
-    @score_manager = ScoreManager.new(display: @display, team1: team1, team2: team2)
-
-    @display.prepare(display_order: @display_order, teams: [team1, team2], score: @score_manager.score)
+    initialize_players
+    initialize_display
+    initialize_managers
+    @display.prepare(
+      display_order: @display_order,
+      teams: [@players.team1, @players.team2],
+      score: @score_manager.score
+    )
   end
 
   def start_game_loop
@@ -63,6 +58,29 @@ class Game
   end
 
   private
+
+  def initialize_players
+    @players = Players.new(
+      south: HumanPlayer.new(name: 'South'),
+      west: ComputerPlayer.new(name: 'West'),
+      north: ComputerPlayer.new(name: 'North'),
+      east: ComputerPlayer.new(name: 'East')
+    )
+    @players.team1 = [@players.south, @players.north]
+    @players.team2 = [@players.west, @players.east]
+  end
+
+  def initialize_display
+    @display_order = [@players.south, @players.west, @players.north, @players.east].freeze
+    @display = Display.new
+  end
+
+  def initialize_managers
+    @deal_manager = DealManager.new(display: @display, player_order: @display_order.dup, dealer: @players.east)
+    @bidding_manager = BiddingManager.new(display: @display, team1: @players.team1, team2: @players.team2)
+    @trick_manager = TrickManager.new(display: @display)
+    @score_manager = ScoreManager.new(display: @display, team1: @players.team1, team2: @players.team2)
+  end
 
   def update_display
     @display.clear_screen

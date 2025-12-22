@@ -52,13 +52,17 @@ class DisplayTricks
     number = index + 1
     lead_suit_glyph = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
     cells = ["#{number}:#{lead_suit_glyph}"]
-    @display_order.each do |player|
-      card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: @trumps)
-      winning = trick.winning_play && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
-      cells.push("#{card}#{winning}")
-    end
+    generate_card_cells(cells, trick)
     cells.push(trick.winner ? trick.winner.to_s : '')
     generate_row(cells, '|')
+  end
+
+  def generate_card_cells(cells, trick)
+    @display_order.each do |player|
+      card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: @trumps)
+      winning = trick.winning_play[:card] && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
+      cells.push("#{card}#{winning}")
+    end
   end
 
   def generate_row(cells, separator)

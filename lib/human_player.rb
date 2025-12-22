@@ -5,7 +5,8 @@ require_relative 'player'
 require_relative 'human_player_bidding'
 require_relative 'human_player_tricks'
 
-# A human player. Holds a hand of cards. Manages the player interface, forwarding messages to HumanPlayerBidding and HumanPlayerTricks.
+# A human player. Holds a hand of cards. Manages the player interface,
+# forwarding messages to HumanPlayerBidding and HumanPlayerTricks.
 class HumanPlayer < Player
   def initialize(name: 'Unknown', bidding: HumanPlayerBidding.new, tricks: HumanPlayerTricks.new)
     super

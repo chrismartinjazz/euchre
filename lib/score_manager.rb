@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Manages updating the score and determining if the game is over
 class ScoreManager
   attr_reader :score, :team1, :team2
 
@@ -17,11 +18,13 @@ class ScoreManager
     @display.message(message: "#{team_names(winner)} wins that hand, scoring #{points_text}.", confirmation: true)
   end
 
-  def team_names(team)
-    team.map(&:to_s).join(' ')
-  end
-
   def game_over?
     @score[@team1] >= @points_to_win_game || @score[@team2] >= @points_to_win_game
+  end
+
+  private
+
+  def team_names(team)
+    team.map(&:to_s).join(' ')
   end
 end

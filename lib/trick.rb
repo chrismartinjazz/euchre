@@ -14,20 +14,22 @@ class Trick
   end
 
   def add(player:, card:)
+    return nil if complete? || !card(player: player).nil?
+
     @lead_suit = card.suit(trumps: @trumps) if @lead_suit.nil?
-    @plays.push({ player: player, card: card, rating: evaluate_card(card) })
+    @plays.push({ player: player, card: card, rating: evaluate_card(card) })[0]
   end
 
   def winner
-    trick_complete? ? winning_play[:player] : nil
+    complete? ? winning_play[:player] : nil
   end
 
-  def trick_complete?
+  def complete?
     @plays.length == @player_count
   end
 
   def winning_play
-    @plays.max_by { |play| play[:rating] }
+    @plays.max_by { |play| play[:rating] } || { player: nil, card: nil, rating: nil }
   end
 
   def card(player:)

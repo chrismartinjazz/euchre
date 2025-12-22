@@ -6,8 +6,18 @@ require_relative '../constants'
 module ComputerPlayerHelpers
   def announce(name, input, confirmation: false)
     string = input.is_a?(Array) ? input.join(' ') : input
-    sleep(THINKING_TIME)
+    think
     puts "\n#{name}: #{string} #{'Press Enter to continue...' if confirmation}".strip
-    gets if confirmation && THINKING_TIME != 0
+    wait_for_user_to_press_enter if confirmation
+  end
+
+  private
+
+  def think
+    sleep(THINKING_TIME)
+  end
+
+  def wait_for_user_to_press_enter
+    gets
   end
 end
