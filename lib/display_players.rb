@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'constants'
-
-Cell = Struct.new(:contents, :justified)
+require_relative 'display_terminal_grid'
 
 # Displays bidding screen
 class DisplayPlayers
@@ -21,14 +20,16 @@ class DisplayPlayers
     @centre_card_suit = centre_card_suit
     south, west, north, east = generate_player_cells
     centre = generate_centre_cell
-    blank = Cell.new([], 'left')
-    player_grid = [
-      [blank, north, blank],
-      [west, centre, east],
-      [blank, south, blank]
-    ]
-    heights = row_heights(player_grid)
-    print_grid(player_grid, heights)
+    blank = DisplayTerminalGrid::Cell.new(contents: [], justified: :left)
+    player_grid = DisplayTerminalGrid::Grid.new(
+      grid: [
+        [blank, north, blank],
+        [west, centre, east],
+        [blank, south, blank]
+      ],
+      border: DisplayTerminalGrid::Border.new(vertical: '', horizontal: ' ', corner: '')
+    )
+    puts player_grid
     nil
   end
 
@@ -36,12 +37,12 @@ class DisplayPlayers
 
   def generate_player_cells
     south, west, north, east = @display_order.each_with_object([]) do |player, array|
-      array.push(Cell.new([player_name(player), hand_text(player)], ''))
+      array.push(DisplayTerminalGrid::Cell.new(contents: [player_name(player), hand_text(player)]))
     end
-    south.justified = 'centre'
-    west.justified = 'left'
-    north.justified = 'centre'
-    east.justified = 'right'
+    south.update(justified: :center)
+    west.update(justified: :left)
+    north.update(justified: :center)
+    east.update(justified: :right)
     [south, west, north, east]
   end
 
@@ -49,7 +50,7 @@ class DisplayPlayers
     centre_suit_text = @centre_card.rank == JOKER ? "#{SUITS[@centre_card_suit][:glyph]} |" : '|'
     centre_text = "| #{@centre_card} #{centre_suit_text}"
     centre_box = "+#{'-' * [(clean(centre_text).length - 2), 0].max}+"
-    Cell.new([centre_box, centre_text, centre_box], 'centre')
+    DisplayTerminalGrid::Cell.new(contents: [centre_box, centre_text, centre_box], justified: :center)
   end
 
   def player_name(player)
@@ -63,68 +64,5 @@ class DisplayPlayers
 
   def clean(text)
     text.to_s.gsub(ANSI_ESCAPE, '')
-  end
-
-  def print_grid(grid, heights)
-    grid.each_with_index do |grid_row, grid_row_index|
-      (heights[grid_row_index] + 1).times do |cell_row_index|
-        row_parts = grid_row.map do |cell|
-          justify(cell.contents[cell_row_index], cell.justified)
-        end
-        puts row_parts.join
-      end
-    end
-  end
-
-  def justify(text, justified)
-    my_text = text.to_s
-    case justified
-    when 'centre'
-      centre_justify(my_text)
-    when 'right'
-      right_justify(my_text)
-    else
-      left_justify(my_text)
-    end
-  end
-
-  def left_justify(text)
-    my_text, my_col_width, _my_length = justify_parameters(text)
-    space_after = ' ' * [(my_col_width - my_text.length), 0].max
-    safe_join([my_text, space_after], my_col_width)
-  end
-
-  def centre_justify(text)
-    my_text, my_col_width, my_length = justify_parameters(text)
-    space_before = ' ' * [((-0.5 * my_length) + (my_col_width / 2.0)).floor, 0].max
-    space_after = ' ' * [((-0.5 * my_length) + (my_col_width / 2.0)).ceil, 0].max
-    safe_join([space_before, my_text, space_after], my_col_width)
-  end
-
-  def right_justify(text)
-    my_text, my_col_width, _my_length = justify_parameters(text)
-    space_before = ' ' * [(my_col_width - my_text.length), 0].max
-    safe_join([space_before, my_text], my_col_width)
-  end
-
-  def justify_parameters(text)
-    my_text = text.to_s
-    my_col_width = compensate_col_width_for_ansi_escape(my_text)
-    my_length = my_text.length
-    [my_text, my_col_width, my_length]
-  end
-
-  def safe_join(array, max_width)
-    array.join[0..[(max_width - 1), 0].max]
-  end
-
-  def compensate_col_width_for_ansi_escape(text)
-    @col_width + text.to_s.scan(ANSI_ESCAPE).join.length
-  end
-
-  def row_heights(grid)
-    grid.each_with_object([]) do |row, array|
-      array.push(row.max_by { |cell| cell.contents.size }.contents.size)
-    end
   end
 end
