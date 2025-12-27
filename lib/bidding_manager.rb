@@ -12,33 +12,33 @@ class BiddingManager
     @team2 = team2
   end
 
-  def handle_bidding(player_order:, centre_card:, centre_card_suit:)
-    init_bidding(player_order: player_order, centre_card: centre_card, centre_card_suit: centre_card_suit)
-    update_display(show_centre_card: true)
+  def handle_bidding(player_order:, center_card:, center_card_suit:)
+    init_bidding(player_order: player_order, center_card: center_card, center_card_suit: center_card_suit)
+    update_display(show_center_card: true)
     bidding_round_one
     return @bid unless @bid == :pass
 
     @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
-    update_display(show_centre_card: false)
-    bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [@centre_card_suit])
+    update_display(show_center_card: false)
+    bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [@center_card_suit])
     nil
   end
 
   private
 
-  def init_bidding(player_order:, centre_card:, centre_card_suit:)
+  def init_bidding(player_order:, center_card:, center_card_suit:)
     @player_order = player_order
     @dealer = player_order[-1]
-    @centre_card = centre_card
-    @centre_card_suit = centre_card_suit
+    @center_card = center_card
+    @center_card_suit = center_card_suit
     @bid = nil
   end
 
-  def update_display(show_centre_card:)
+  def update_display(show_center_card:)
     @display.clear_screen
     @display.score
-    if show_centre_card
-      @display.players(dealer: @dealer, centre_card: @centre_card, centre_card_suit: @centre_card_suit)
+    if show_center_card
+      @display.players(dealer: @dealer, center_card: @center_card, center_card_suit: @center_card_suit)
     else
       @display.players(dealer: @dealer)
     end
@@ -47,11 +47,11 @@ class BiddingManager
   def bidding_round_one
     @player_order.each do |player|
       response = player.decide_bid(
-        options: [@centre_card_suit], card: @centre_card, dealer: dealer_relationship_to(player)
+        options: [@center_card_suit], card: @center_card, dealer: dealer_relationship_to(player)
       )
       next if response[:bid] == :pass
 
-      @dealer.exchange_card!(card: @centre_card, trumps: response[:bid])
+      @dealer.exchange_card!(card: @center_card, trumps: response[:bid])
       handle_response(response, player)
       return nil
     end

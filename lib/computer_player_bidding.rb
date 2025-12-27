@@ -21,7 +21,7 @@ class ComputerPlayerBidding
 
   def decide_bid(options:, hand:, card: nil, dealer: nil)
     my_hand = hand.dup
-    handle_centre_card(my_hand, options[0], card, dealer) if card && %i[partner self].include?(dealer)
+    handle_center_card(my_hand, options[0], card, dealer) if card && %i[partner self].include?(dealer)
     suit, score = best_option_and_score(my_hand, options)
     announce(@name, score) if DISPLAY_THINKING
     bid, going_alone = evaluate_bid(suit, score)
@@ -45,7 +45,7 @@ class ComputerPlayerBidding
 
   private
 
-  def handle_centre_card(my_hand, suit, card, dealer)
+  def handle_center_card(my_hand, suit, card, dealer)
     case dealer
     when :partner
       my_hand.push(card)

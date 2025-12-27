@@ -33,19 +33,19 @@ RSpec.describe Display do
       expect(result).to eq nil
     end
   end
-  it "displays the bidding hands with north as dealer and a normal centre card" do
-    centre_card = deck.draw_one
+  it "displays the bidding hands with north as dealer and a normal center card" do
+    center_card = deck.draw_one
     silence do
       puts
-      result = display.players(dealer: north, centre_card: centre_card, centre_card_suit: centre_card.suit)
+      result = display.players(dealer: north, center_card: center_card, center_card_suit: center_card.suit)
       expect(result).to eq nil
     end
   end
-  it "displays the bidding hands with east as dealer and a joker turned up as centre card" do
-    centre_card = Card.for(rank: JOKER, suit: JOKER_SUIT)
+  it "displays the bidding hands with east as dealer and a joker turned up as center card" do
+    center_card = Card.for(rank: JOKER, suit: JOKER_SUIT)
     silence do
       puts
-      result = display.players(dealer: east, centre_card: centre_card, centre_card_suit: DIAMONDS)
+      result = display.players(dealer: east, center_card: center_card, center_card_suit: DIAMONDS)
       expect(result).to eq nil
     end
   end

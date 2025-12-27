@@ -14,17 +14,17 @@ class DisplayPlayers
     @display_order = display_order
   end
 
-  def grid(dealer:, centre_card:, centre_card_suit:)
+  def grid(dealer:, center_card:, center_card_suit:)
     @dealer = dealer
-    @centre_card = centre_card
-    @centre_card_suit = centre_card_suit
+    @center_card = center_card
+    @center_card_suit = center_card_suit
     south, west, north, east = generate_player_cells
-    centre = generate_centre_cell
+    center = generate_center_cell
     blank = DisplayTerminalGrid::Cell.new(contents: [], justified: :left)
     player_grid = DisplayTerminalGrid::Grid.new(
       grid: [
         [blank, north, blank],
-        [west, centre, east],
+        [west, center, east],
         [blank, south, blank]
       ],
       border: DisplayTerminalGrid::Border.new(vertical: '', horizontal: ' ', corner: '')
@@ -46,11 +46,11 @@ class DisplayPlayers
     [south, west, north, east]
   end
 
-  def generate_centre_cell
-    centre_suit_text = @centre_card.rank == JOKER ? "#{SUITS[@centre_card_suit][:glyph]} |" : '|'
-    centre_text = "| #{@centre_card} #{centre_suit_text}"
-    centre_box = "+#{'-' * [(clean(centre_text).length - 2), 0].max}+"
-    DisplayTerminalGrid::Cell.new(contents: [centre_box, centre_text, centre_box], justified: :center)
+  def generate_center_cell
+    center_suit_text = @center_card.rank == JOKER ? "#{SUITS[@center_card_suit][:glyph]} |" : '|'
+    center_text = "| #{@center_card} #{center_suit_text}"
+    center_box = "+#{'-' * [(clean(center_text).length - 2), 0].max}+"
+    DisplayTerminalGrid::Cell.new(contents: [center_box, center_text, center_box], justified: :center)
   end
 
   def player_name(player)

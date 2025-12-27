@@ -13,7 +13,7 @@ RSpec.describe HumanPlayer do
   let(:human_player_bidding) { instance_double(HumanPlayerBidding) }
   let(:human_player_tricks) { instance_double(HumanPlayerTricks) }
   let(:player) { HumanPlayer.new(name: 'player', bidding: human_player_bidding, tricks: human_player_tricks) }
-  let(:centre_card) { 'test card' }
+  let(:center_card) { 'test card' }
   let(:trumps) { 'test trumps' }
 
   before do
@@ -31,34 +31,34 @@ RSpec.describe HumanPlayer do
     it 'forwards #exchange_card! to human_player_bidding defaulting to the current hand if none is supplied' do
       player.hand = ['test hand']
 
-      expect(human_player_bidding).to receive(:exchange_card!).with(card: centre_card, trumps: trumps, hand: player.hand)
-      player.exchange_card!(card: centre_card, trumps: trumps)
+      expect(human_player_bidding).to receive(:exchange_card!).with(card: center_card, trumps: trumps, hand: player.hand)
+      player.exchange_card!(card: center_card, trumps: trumps)
     end
 
     it 'forwards #exchange_card! to human_player_bidding with a supplied hand' do
       supplied_hand = ['test supplied hand']
 
-      expect(human_player_bidding).to receive(:exchange_card!).with(card: centre_card, trumps: trumps, hand: supplied_hand)
-      player.exchange_card!(card: centre_card, trumps: trumps, hand: supplied_hand)
+      expect(human_player_bidding).to receive(:exchange_card!).with(card: center_card, trumps: trumps, hand: supplied_hand)
+      player.exchange_card!(card: center_card, trumps: trumps, hand: supplied_hand)
     end
   end
 
   describe "#decide_bid" do
     let(:options) { 'test_options' }
 
-    it 'forwards #decide_bid to human_player_bidding, with the centre card defaulting to nil if none is supplied' do
+    it 'forwards #decide_bid to human_player_bidding, with the center card defaulting to nil if none is supplied' do
       expect(human_player_bidding).to receive(:decide_bid).with(options: options, card: nil)
       player.decide_bid(options: options)
     end
 
-    it 'forwards #decide_bid to human_player_bidding, including a centre card if one is supplied' do
-      expect(human_player_bidding).to receive(:decide_bid).with(options: options, card: centre_card)
-      player.decide_bid(options: options, card: centre_card)
+    it 'forwards #decide_bid to human_player_bidding, including a center card if one is supplied' do
+      expect(human_player_bidding).to receive(:decide_bid).with(options: options, card: center_card)
+      player.decide_bid(options: options, card: center_card)
     end
 
     it 'ignores other keyword arguments and forwards only options: and card:' do
-      expect(human_player_bidding).to receive(:decide_bid).with(options: options, card: centre_card)
-      player.decide_bid(options: options, card: centre_card, other_kw_argument: nil)
+      expect(human_player_bidding).to receive(:decide_bid).with(options: options, card: center_card)
+      player.decide_bid(options: options, card: center_card, other_kw_argument: nil)
     end
   end
 

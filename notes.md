@@ -68,7 +68,7 @@
     - [x] If the strongest card in hand can't win the trick, play the weakest valid card instead
     - [x] If partner is already winning the trick with a strong card, play weakest card rather than strongest.
     - [x] When exchanging a card as dealer, prefer to 'short' a suit if holding a single card of one suit that is not an Ace.
-    - [x] When bidding on centre card, consider the strength of the card in the prospective trump suit and adjust minimum hand score up if adding card to own team.
+    - [x] When bidding on center card, consider the strength of the card in the prospective trump suit and adjust minimum hand score up if adding card to own team.
   - [x] Change the evaluation of a hand, so it is on more of an exponential scale. Put this into a constant so it can be experimented with.
 
 ### TrickManager
@@ -117,14 +117,14 @@
 Deal the cards
 Shuffle the deck
 5 cards to each of 4 players
-1 centre card (face up)
+1 center card (face up)
 (Remaining cards are unused)
 Bidding:
 Set the bidding player to the player after the dealer
 Each player starting with the bidding player can either:
 Direct dealer to pick up card
-Dealer picks up centre card and removes a card of his choice (including centre card) from his hand
-Set trump suit based on centre card and bidding player
+Dealer picks up center card and removes a card of his choice (including center card) from his hand
+Set trump suit based on center card and bidding player
 Bidder chooses and announces if "going alone": set go alone
 Pass
 If no suit has been set as trumps:

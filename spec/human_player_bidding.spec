@@ -7,7 +7,7 @@ require 'helpers'
 
 RSpec.describe HumanPlayerBidding do
   let(:human_player_bidding) { HumanPlayerBidding.new }
-  context 'with a strong clubs hand (9C, TC, QC, KC, JS) and a Jack of Clubs as centre card' do
+  context 'with a strong clubs hand (9C, TC, QC, KC, JS) and a Jack of Clubs as center card' do
     let(:hand) { [
       Card.for(rank: NINE, suit: CLUBS),
       Card.for(rank: TEN, suit: CLUBS),
@@ -15,14 +15,14 @@ RSpec.describe HumanPlayerBidding do
       Card.for(rank: KING, suit: CLUBS),
       Card.for(rank: JACK, suit: SPADES)
     ] }
-    let(:centre_card) { Card.for(rank: JACK, suit: CLUBS) }
+    let(:center_card) { Card.for(rank: JACK, suit: CLUBS) }
 
     let(:nine_of_diamonds) { Card.for(rank: NINE, suit: DIAMONDS) }
 
     it 'successfully exchanges a card' do
       silence do
         allow(human_player_bidding).to receive(:gets).and_return('1')
-        discarded_card = human_player_bidding.exchange_card!(hand: hand, card: centre_card, trumps: CLUBS)
+        discarded_card = human_player_bidding.exchange_card!(hand: hand, card: center_card, trumps: CLUBS)
 
         expect(discarded_card).to have_attributes(rank: NINE, suit: CLUBS)
         expect(hand.last).to have_attributes(rank: JACK, suit: CLUBS)
@@ -39,7 +39,7 @@ RSpec.describe HumanPlayerBidding do
       end
     end
 
-    it 'can pass on the centre card' do
+    it 'can pass on the center card' do
       silence do
         allow(human_player_bidding).to receive(:gets).and_return('2')
         bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
@@ -49,7 +49,7 @@ RSpec.describe HumanPlayerBidding do
       end
     end
 
-    it 'can order up the centre card, not going alone' do
+    it 'can order up the center card, not going alone' do
       silence do
         allow(human_player_bidding).to receive(:gets).and_return('1', 'N')
         bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
@@ -59,7 +59,7 @@ RSpec.describe HumanPlayerBidding do
       end
     end
 
-    it 'can order up the centre card, and go alone' do
+    it 'can order up the center card, and go alone' do
       silence do
         allow(human_player_bidding).to receive(:gets).and_return('1', 'Y')
         bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)

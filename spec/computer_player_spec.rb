@@ -23,7 +23,7 @@ RSpec.describe ComputerPlayer do
   end
 
   describe "#decide_bid" do
-    it 'forwards #decide_bid to computer_player_bidding, centre card defaulting to nil, hand defaulting to players hand, dealer defaulting to nil' do
+    it 'forwards #decide_bid to computer_player_bidding, center card defaulting to nil, hand defaulting to players hand, dealer defaulting to nil' do
       expect(computer_player_bidding).to receive(:decide_bid).with(
         options: 'test options',
         hand: player.hand,
@@ -33,7 +33,7 @@ RSpec.describe ComputerPlayer do
       player.decide_bid(options: 'test options')
     end
 
-    it 'forwards #decide_bid to computer_player_bidding, including centre card, hand, dealer if supplied' do
+    it 'forwards #decide_bid to computer_player_bidding, including center card, hand, dealer if supplied' do
       expect(computer_player_bidding).to receive(:decide_bid).with(
         options: 'test options',
         hand: 'test hand',

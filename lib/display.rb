@@ -28,8 +28,8 @@ class Display
     @display_score.scoreboard
   end
 
-  def players(dealer:, centre_card: @face_down_card, centre_card_suit: @face_down_card.suit)
-    @display_players.grid(dealer: dealer, centre_card: centre_card, centre_card_suit: centre_card_suit)
+  def players(dealer:, center_card: @face_down_card, center_card_suit: @face_down_card.suit)
+    @display_players.grid(dealer: dealer, center_card: center_card, center_card_suit: center_card_suit)
   end
 
   def tricks(trumps:, tricks:, bidders:)

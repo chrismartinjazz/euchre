@@ -33,7 +33,7 @@ RSpec.describe ComputerPlayerBidding do
       Card.for(rank: ACE, suit: SPADES)
     ] }
 
-    it 'orders up centre_card if it is a club, regardless of who is the dealer' do
+    it 'orders up center_card if it is a club, regardless of who is the dealer' do
       silence do
         response_no_dealer = computer_player_bidding.decide_bid(
           hand: hand,
@@ -60,7 +60,7 @@ RSpec.describe ComputerPlayerBidding do
       end
     end
 
-    it 'does not order up centre_card if it is a diamond' do
+    it 'does not order up center_card if it is a diamond' do
       silence do
         response = computer_player_bidding.decide_bid(
           hand: hand,
@@ -71,7 +71,7 @@ RSpec.describe ComputerPlayerBidding do
       end
     end
 
-    it 'goes alone when ordering up centre_card if it is a club' do
+    it 'goes alone when ordering up center_card if it is a club' do
       silence do
         response = computer_player_bidding.decide_bid(hand: hand, options: [CLUBS], card: ten_of_clubs)
         expect(response[:bid]).to eq CLUBS
@@ -79,7 +79,7 @@ RSpec.describe ComputerPlayerBidding do
       end
     end
 
-    it 'if the centre card (spades) is turned down, still bids clubs and goes alone' do
+    it 'if the center card (spades) is turned down, still bids clubs and goes alone' do
       silence do
         response = computer_player_bidding.decide_bid(hand: hand, options: [CLUBS, DIAMONDS, HEARTS])
         expect(response[:bid]).to eq CLUBS
@@ -105,7 +105,7 @@ RSpec.describe ComputerPlayerBidding do
       Card.for(rank: NINE, suit: SPADES)
     ] }
 
-    it 'does not order up hearts unless can pick up a heart centre card as dealer (this hand is only just good enough to bid)' do
+    it 'does not order up hearts unless can pick up a heart center card as dealer (this hand is only just good enough to bid)' do
       silence do
         response_self_dealer = computer_player_bidding.decide_bid(
           hand: hand.dup,

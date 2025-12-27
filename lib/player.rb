@@ -24,7 +24,7 @@ class Player
   end
 
   # Methods that must be implemented by subclasses
-  def bid_centre_card(**_keyword_args)
+  def bid_center_card(**_keyword_args)
     raise NotImplementedError
   end
 

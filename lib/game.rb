@@ -30,8 +30,8 @@ class Game
       update_display
       @bidding_manager.handle_bidding(
         player_order: @deal_manager.player_order,
-        centre_card: @deal_manager.centre_card,
-        centre_card_suit: @deal_manager.centre_card_suit
+        center_card: @deal_manager.center_card,
+        center_card_suit: @deal_manager.center_card_suit
       )
 
       if @bidding_manager.bid == :pass
@@ -87,8 +87,8 @@ class Game
     @display.score
     @display.players(
       dealer: @deal_manager.dealer,
-      centre_card: @deal_manager.centre_card,
-      centre_card_suit: @deal_manager.centre_card_suit
+      center_card: @deal_manager.center_card,
+      center_card_suit: @deal_manager.center_card_suit
     )
   end
 end

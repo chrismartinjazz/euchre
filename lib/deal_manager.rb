@@ -6,7 +6,7 @@ require_relative 'deck'
 
 # Manages the deck and dealing.
 class DealManager
-  attr_reader :player_order, :dealer, :centre_card, :centre_card_suit
+  attr_reader :player_order, :dealer, :center_card, :center_card_suit
 
   def initialize(display:, player_order:, dealer: nil)
     @display = display
@@ -19,8 +19,8 @@ class DealManager
     deck.shuffle
     @player_order.each(&:reset_hand)
     @player_order.each { |player| player.add_to_hand(cards: deck.deal(count: 5)) }
-    @centre_card = deck.draw_one
-    @centre_card_suit = @centre_card.suit == JOKER_SUIT ? handle_centre_card_is_joker : @centre_card.suit
+    @center_card = deck.draw_one
+    @center_card_suit = @center_card.suit == JOKER_SUIT ? handle_center_card_is_joker : @center_card.suit
   end
 
   def rotate_player_order
@@ -31,7 +31,7 @@ class DealManager
 
   private
 
-  def handle_centre_card_is_joker
+  def handle_center_card_is_joker
     @display.message(
       message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.'
     )
