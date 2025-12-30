@@ -1,94 +1,52 @@
 # frozen_string_literal: true
 
-require_relative 'human_player'
-require_relative 'computer_player'
-require_relative 'deck'
+require_relative 'context'
 require_relative 'display'
+require_relative 'player_manager'
 require_relative 'deal_manager'
-require_relative 'trick_manager'
 require_relative 'bidding_manager'
+require_relative 'trick_manager'
 require_relative 'score_manager'
 
-Players = Struct.new(:south, :west, :north, :east, :team1, :team2)
-
-# The game.
+# The game. Holds the context for the game and coordinates the game loop.
 class Game
   def initialize
-    initialize_players
-    initialize_display
-    initialize_managers
-    @display.prepare(
-      display_order: @display_order,
-      teams: [@players.team1, @players.team2],
-      score: @score_manager.score
-    )
+    @context = Context.new
+    @display = Display.new
+
+    @player_manager = PlayerManager.new
+    @deal_manager = DealManager.new
+    @bidding_manager = BiddingManager.new
+    @trick_manager = TrickManager.new
+    @score_manager = ScoreManager.new
+
+    [@player_manager, @deal_manager, @score_manager, @display].each { |preparer| preparer.prepare(context: @context) }
   end
 
   def start_game_loop
-    loop do
-      @deal_manager.deal
+    until @score_manager.game_over?(context: @context)
+      @deal_manager.deal(context: @context, display: @display)
       update_display
-      @bidding_manager.handle_bidding(
-        player_order: @deal_manager.player_order,
-        center_card: @deal_manager.center_card,
-        center_card_suit: @deal_manager.center_card_suit
-      )
-
-      if @bidding_manager.bid == :pass
-        @deal_manager.rotate_player_order
-        next
+      @bidding_manager.handle_bidding(context: @context, display: @display)
+      unless @context.bid.pass
+        @trick_manager.play_hand(context: @context, display: @display)
+        @score_manager.update_score(context: @context, display: @display)
       end
-
-      @trick_manager.play_hand(
-        trumps: @bidding_manager.bid,
-        going_alone: @bidding_manager.going_alone,
-        bidders: @bidding_manager.bidders,
-        defenders: @bidding_manager.defenders,
-        player_order: @bidding_manager.player_order
-      )
-
-      @score_manager.update_score(winner: @trick_manager.winner, points: @trick_manager.points)
-      break if @score_manager.game_over?
-
-      @deal_manager.rotate_player_order
+      @deal_manager.rotate_player_order(context: @context, display: @display)
     end
-
-    @display.message(message: 'Game Over!')
-    @display.score
+    display_end_game_messages
   end
 
   private
 
-  def initialize_players
-    @players = Players.new(
-      south: HumanPlayer.new(name: 'South'),
-      west: ComputerPlayer.new(name: 'West'),
-      north: ComputerPlayer.new(name: 'North'),
-      east: ComputerPlayer.new(name: 'East')
-    )
-    @players.team1 = [@players.south, @players.north]
-    @players.team2 = [@players.west, @players.east]
-  end
-
-  def initialize_display
-    @display_order = [@players.south, @players.west, @players.north, @players.east].freeze
-    @display = Display.new
-  end
-
-  def initialize_managers
-    @deal_manager = DealManager.new(display: @display, player_order: @display_order.dup, dealer: @players.east)
-    @bidding_manager = BiddingManager.new(display: @display, team1: @players.team1, team2: @players.team2)
-    @trick_manager = TrickManager.new(display: @display)
-    @score_manager = ScoreManager.new(display: @display, team1: @players.team1, team2: @players.team2)
-  end
-
   def update_display
     @display.clear_screen
+    @display.score(context: @context)
+    @display.players(context: @context)
+  end
+
+  def display_end_game_messages
+    @display.message(message: 'Game Over!')
     @display.score
-    @display.players(
-      dealer: @deal_manager.dealer,
-      center_card: @deal_manager.center_card,
-      center_card_suit: @deal_manager.center_card_suit
-    )
   end
 end

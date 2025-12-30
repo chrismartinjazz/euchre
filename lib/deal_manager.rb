@@ -1,53 +1,44 @@
 # frozen_string_literal: true
 
 require_relative 'constants'
-require_relative 'card'
 require_relative 'deck'
 
 # Manages the deck and dealing.
 class DealManager
-  attr_reader :player_order, :dealer, :center_card, :center_card_suit
-
-  def initialize(display:, player_order:, dealer: nil)
-    @display = display
-    @player_order = player_order
-    @dealer = dealer.nil? ? player_order[rand(0..(player_order.length - 1))] : dealer
+  def prepare(context:)
+    context.dealer ||= context.player_order.sample
+    context
   end
 
-  def deal
-    deck = Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
+  def deal(context:, display:, deck: nil)
+    deck ||= Deck.new(ranks: RANKS[:non_trumps], joker_count: 1)
     deck.shuffle
-    @player_order.each(&:reset_hand)
-    @player_order.each { |player| player.add_to_hand(cards: deck.deal(count: 5)) }
-    @center_card = deck.draw_one
-    @center_card_suit = @center_card.suit == JOKER_SUIT ? handle_center_card_is_joker : @center_card.suit
+    context.player_order.each(&:reset_hand)
+    context.player_order.each { |player| player.add_to_hand(cards: deck.deal(count: 5)) }
+    context.center_card = deck.draw_one
+    context.center_card_suit = handle_center_card(context, display)
+    context
   end
 
-  def rotate_player_order
-    @dealer = player_after(@dealer)
-    rotate_player_order_to_start_with(player_after(@dealer))
-    @display.message(message: "New dealer is #{@dealer}. Reshuffling . . . ", confirmation: true)
+  def rotate_player_order(context:, display:)
+    # Find the dealer in the player order, and advance two positions around the table to find the new 'first player'.
+    # Normalize the index (% 4), rotate the player order to start with this new player, set the dealer to be the last
+    # player of the new player order.
+    context.player_order.rotate!((context.player_order.find_index(context.dealer) + 2) % 4)
+    context.dealer = context.player_order.last
+    display.message(message: "New dealer is #{context.dealer}. Reshuffling . . . ", confirmation: true)
   end
 
   private
 
-  def handle_center_card_is_joker
-    @display.message(
-      message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.'
-    )
-    suit = @dealer.choose_a_suit
-    @display.message(message: '', confirmation: true)
-    suit
-  end
-
-  def player_after(player)
-    player_index = @player_order.find_index(player)
-    return @player_order[0] if player_index == @player_order.length - 1
-
-    @player_order[player_index + 1]
-  end
-
-  def rotate_player_order_to_start_with(starting_player)
-    @player_order.rotate!(@player_order.find_index(starting_player))
+  def handle_center_card(context, display)
+    if context.center_card.suit == JOKER_SUIT
+      display.message(
+        message: 'The turned up card is a joker! The dealer must choose a trump suit before looking at their hand.'
+      )
+      context.dealer.choose_a_suit
+    else
+      context.center_card.suit
+    end
   end
 end

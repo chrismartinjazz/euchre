@@ -2,24 +2,23 @@
 
 # Manages updating the score and determining if the game is over
 class ScoreManager
-  attr_reader :score, :team1, :team2
+  POINTS_TO_WIN_GAME = 11
 
-  def initialize(display:, team1:, team2:)
-    @display = display
-    @team1 = team1
-    @team2 = team2
-    @points_to_win_game = 11
-    @score = { @team1 => 0, @team2 => 0 }
+  def prepare(context:)
+    context.score = { context.players.team1 => 0, context.players.team2 => 0 }
   end
 
-  def update_score(winner:, points:)
-    @score[winner] += points
+  def update_score(context:, display:)
+    winners = context.result.winners
+    points = context.result.points
+    context.score[winners] += points
     points_text = points > 1 ? "#{points} points" : "#{points} point"
-    @display.message(message: "#{team_names(winner)} wins that hand, scoring #{points_text}.", confirmation: true)
+    display.message(message: "#{team_names(winners)} wins that hand, scoring #{points_text}.", confirmation: true)
   end
 
-  def game_over?
-    @score[@team1] >= @points_to_win_game || @score[@team2] >= @points_to_win_game
+  def game_over?(context:)
+    context.score[context.players.team1] >= POINTS_TO_WIN_GAME ||
+      context.score[context.players.team2] >= POINTS_TO_WIN_GAME
   end
 
   private

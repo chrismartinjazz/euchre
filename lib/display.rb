@@ -11,29 +11,26 @@ class Display
     @display_score = DisplayScore.new
     @display_players = DisplayPlayers.new
     @display_tricks = DisplayTricks.new
-    @face_down_card = Card.for(rank: '', suit: '')
   end
 
-  def prepare(display_order:, teams:, score:)
-    @display_score.prepare(teams: teams, score: score)
-    @display_players.prepare(display_order: display_order)
-    @display_tricks.prepare(display_order: display_order)
+  def prepare(context:)
+    @display_tricks.prepare(context: context)
   end
 
   def clear_screen
     system('cls') || system('clear')
   end
 
-  def score
-    @display_score.scoreboard
+  def score(context:)
+    @display_score.scoreboard(context: context)
   end
 
-  def players(dealer:, center_card: @face_down_card, center_card_suit: @face_down_card.suit)
-    @display_players.grid(dealer: dealer, center_card: center_card, center_card_suit: center_card_suit)
+  def players(context:)
+    @display_players.grid(context: context)
   end
 
-  def tricks(trumps:, tricks:, bidders:)
-    @display_tricks.table(trumps: trumps, tricks: tricks, bidders: bidders)
+  def tricks(context:)
+    @display_tricks.table(context: context)
   end
 
   def message(message: '', confirmation: false)

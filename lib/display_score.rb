@@ -9,21 +9,11 @@ class DisplayScore
     @bottom_line = generate_bottom_line
   end
 
-  def prepare(teams:, score:)
-    @teams = teams
-    @score = score
-  end
-
-  def scoreboard
-    team1_text = team_text(@teams[0], @score[@teams[0]])
-    team2_text = team_text(@teams[1], @score[@teams[1]])
-    padding = ' ' * (DISPLAY_WIDTH - 4 - team1_text.length - team2_text.length)
-    puts [
-      @top_line,
-      "| #{team1_text}#{padding}#{team2_text} |",
-      @bottom_line,
-      ''
-    ]
+  def scoreboard(context:)
+    team1_text, team2_text = generate_team_text(context)
+    padding_text = generate_padding(team1_text, team2_text)
+    scoreboard_text = generate_scoreboard(team1_text, team2_text, padding_text)
+    puts scoreboard_text
   end
 
   private
@@ -38,11 +28,26 @@ class DisplayScore
     '*' * DISPLAY_WIDTH
   end
 
-  def team_text(team, points)
-    "#{team_names(team)}: #{points} points"
+  def generate_team_text(context)
+    team1_text = "#{team_names(context.players.team1)}: #{context.score[context.players.team1]} points"
+    team2_text = "#{team_names(context.players.team2)}: #{context.score[context.players.team2]} points"
+    [team1_text, team2_text]
   end
 
   def team_names(team)
     team.map(&:to_s).join(' ')
+  end
+
+  def generate_padding(team1_text, team2_text)
+    ' ' * (DISPLAY_WIDTH - 4 - team1_text.length - team2_text.length)
+  end
+
+  def generate_scoreboard(team1_text, team2_text, padding)
+    [
+      @top_line,
+      "| #{team1_text}#{padding}#{team2_text} |",
+      @bottom_line,
+      ''
+    ]
   end
 end

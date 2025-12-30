@@ -1,103 +1,102 @@
 # frozen_string_literal: true
 
 require_relative 'constants'
+require_relative 'bid'
 
 # Manages bidding
 class BiddingManager
-  attr_reader :player_order, :bid, :going_alone, :bidders, :defenders
-
-  def initialize(display:, team1:, team2:)
-    @display = display
-    @team1 = team1
-    @team2 = team2
+  def initialize
+    @blank_card = Card.for(rank: '', suit: '')
   end
 
-  def handle_bidding(player_order:, center_card:, center_card_suit:)
-    init_bidding(player_order: player_order, center_card: center_card, center_card_suit: center_card_suit)
-    update_display(show_center_card: true)
-    bidding_round_one
-    return @bid unless @bid == :pass
+  def handle_bidding(context:, display:)
+    context.bid = Bid.new
+    center_card_suit = context.center_card_suit
 
-    @display.message(message: "#{@dealer}: I turn it down.", confirmation: true)
-    update_display(show_center_card: false)
-    bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [@center_card_suit])
-    nil
+    update_display(context, display)
+    bidding_round_one(context)
+    return context unless context.bid.pass
+
+    display.message(message: "#{context.dealer}: I turn it down.", confirmation: true)
+    update_display(context, display)
+    bidding_round_two([CLUBS, DIAMONDS, HEARTS, SPADES] - [center_card_suit], context)
+    context
   end
 
   private
 
-  def init_bidding(player_order:, center_card:, center_card_suit:)
-    @player_order = player_order
-    @dealer = player_order[-1]
-    @center_card = center_card
-    @center_card_suit = center_card_suit
-    @bid = nil
+  def update_display(context, display)
+    display.clear_screen
+    display.score(context: context)
+    display.players(context: context)
   end
 
-  def update_display(show_center_card:)
-    @display.clear_screen
-    @display.score
-    if show_center_card
-      @display.players(dealer: @dealer, center_card: @center_card, center_card_suit: @center_card_suit)
-    else
-      @display.players(dealer: @dealer)
-    end
-  end
-
-  def bidding_round_one
-    @player_order.each do |player|
+  def bidding_round_one(context)
+    context.player_order.each do |player|
       response = player.decide_bid(
-        options: [@center_card_suit], card: @center_card, dealer: dealer_relationship_to(player)
+        options: [context.center_card_suit], card: context.center_card, dealer: dealer_relationship_to(player, context)
       )
       next if response[:bid] == :pass
 
-      @dealer.exchange_card!(card: @center_card, trumps: response[:bid])
-      handle_response(response, player)
+      context.dealer.exchange_card!(card: context.center_card, trumps: response[:bid])
+      handle_response(response, player, context)
+
+      context.center_card = @blank_card
+      context.center_card_suit = @blank_card.suit
       return nil
     end
-    @bid = :pass
+    context.bid.pass = true
   end
 
-  def dealer_relationship_to(player)
-    if @dealer == player
+  def dealer_relationship_to(player, context)
+    if context.dealer == player
       :self
-    elsif (@team1.include?(@dealer) && @team1.include?(player)) || (@team2.include?(@dealer) && @team2.include?(player))
+    elsif (context.players.team1.include?(context.dealer) && context.players.team1.include?(player)) ||
+          (context.players.team2.include?(context.dealer) && context.players.team2.include?(player))
       :partner
+    else
+      :opposition
     end
   end
 
-  def bidding_round_two(available_trumps)
-    @player_order.each do |player|
+  def bidding_round_two(available_trumps, context)
+    context.player_order.each do |player|
       response = player.decide_bid(options: available_trumps)
       next if response[:bid] == :pass
 
-      handle_response(response, player)
+      handle_response(response, player, context)
       return nil
     end
-    @bid = :pass
+    context.bid.pass = true
   end
 
-  def handle_response(response, player)
-    @bid = response[:bid]
-    @going_alone = response[:going_alone]
+  def handle_response(response, player, context)
+    context.bid.pass = false
+    context.bid.bidder = player
+    context.bid.trumps = response[:bid]
+    context.bid.going_alone = response[:going_alone]
 
-    determine_bidders_and_defenders(player)
-    update_player_order(player)
+    determine_bidders_and_defenders(player, context)
+    update_player_order(player, context)
     nil
   end
 
-  def determine_bidders_and_defenders(player)
-    if @team1.include?(player)
-      @bidders = @team1
-      @defenders = @team2
+  def determine_bidders_and_defenders(player, context)
+    if context.players.team1.include?(player)
+      context.bid.bidders = context.players.team1
+      context.bid.defenders = context.players.team2
     else
-      @bidders = @team2
-      @defenders = @team1
+      context.bid.bidders = context.players.team2
+      context.bid.defenders = context.players.team1
     end
   end
 
-  def update_player_order(player)
-    trick_players = @going_alone ? [player] + @defenders : @bidders + @defenders
-    @player_order = @player_order.intersection(trick_players)
+  def update_player_order(player, context)
+    trick_players = if context.bid.going_alone
+                      [player] + context.bid.defenders
+                    else
+                      context.bid.bidders + context.bid.defenders
+                    end
+    context.player_order = context.player_order.intersection(trick_players)
   end
 end

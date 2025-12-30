@@ -19,7 +19,4 @@ A terminal implementation of the card game Euchre, using Australian style rules 
 - Polymorphic HumanPlayer / ComputerPlayer objects respond to messages
 - Basic test coverage with Rspec with key unit tests and integration tests
 - constants.rb includes the suits, ranks, and some settings for gameplay and display.
-
-## To do
-
-- The "grid" and "table" methods were interesting, with options for justification of cell text. This would be interesting to extract into a reusable module.
+- DisplayTerminalGrid module allows justifying text within cells left, right, center, cells of variable widths.
