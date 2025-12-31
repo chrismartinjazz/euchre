@@ -1,0 +1,46 @@
+# frozen_string_literal: true
+
+module Euchre
+  module Players
+    # Player superclass
+    class Player
+      attr_reader :name
+      attr_accessor :hand
+
+      def initialize(name: 'Unknown', **_keyword_args)
+        @hand = []
+        @name = name
+      end
+
+      def add_to_hand(cards:)
+        @hand.push(cards)
+        @hand.flatten!
+      end
+
+      def reset_hand
+        @hand.clear
+      end
+
+      def to_s
+        @name
+      end
+
+      # Interface methods that must be implemented by subclasses
+      def bid_center_card(**_keyword_args)
+        raise NotImplementedError
+      end
+
+      def bid_trumps(**_keyword_args)
+        raise NotImplementedError
+      end
+
+      def exchange_card(**_keyword_args)
+        raise NotImplementedError
+      end
+
+      def choose_a_suit(**_keyword_args)
+        raise NotImplementedError
+      end
+    end
+  end
+end

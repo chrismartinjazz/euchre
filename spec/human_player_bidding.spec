@@ -1,133 +1,133 @@
 # frozen_string_literal: true
 
-require 'constants'
-require 'card'
-require 'human_player_bidding'
-require 'helpers'
+require 'euchre'
 
-RSpec.describe HumanPlayerBidding do
-  let(:human_player_bidding) { HumanPlayerBidding.new }
-  context 'with a strong clubs hand (9C, TC, QC, KC, JS) and a Jack of Clubs as center card' do
-    let(:hand) { [
-      Card.for(rank: NINE, suit: CLUBS),
-      Card.for(rank: TEN, suit: CLUBS),
-      Card.for(rank: QUEEN, suit: CLUBS),
-      Card.for(rank: KING, suit: CLUBS),
-      Card.for(rank: JACK, suit: SPADES)
-    ] }
-    let(:center_card) { Card.for(rank: JACK, suit: CLUBS) }
+module Euchre
+  include Euchre::Constants
+  RSpec.describe Players::HumanPlayerBidding do
+    let(:human_player_bidding) { Players::HumanPlayerBidding.new }
+    context 'with a strong clubs hand (9C, TC, QC, KC, JS) and a Jack of Clubs as center card' do
+      let(:hand) { [
+        Props::Card.for(rank: NINE, suit: CLUBS),
+        Props::Card.for(rank: TEN, suit: CLUBS),
+        Props::Card.for(rank: QUEEN, suit: CLUBS),
+        Props::Card.for(rank: KING, suit: CLUBS),
+        Props::Card.for(rank: JACK, suit: SPADES)
+      ] }
+      let(:center_card) { Props::Card.for(rank: JACK, suit: CLUBS) }
 
-    let(:nine_of_diamonds) { Card.for(rank: NINE, suit: DIAMONDS) }
+      let(:nine_of_diamonds) { Props::Card.for(rank: NINE, suit: DIAMONDS) }
 
-    it 'successfully exchanges a card' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('1')
-        discarded_card = human_player_bidding.exchange_card!(hand: hand, card: center_card, trumps: CLUBS)
+      it 'successfully exchanges a card' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('1')
+          discarded_card = human_player_bidding.exchange_card!(hand: hand, card: center_card, trumps: CLUBS)
 
-        expect(discarded_card).to have_attributes(rank: NINE, suit: CLUBS)
-        expect(hand.last).to have_attributes(rank: JACK, suit: CLUBS)
-        expect(hand.length).to eq 5
+          expect(discarded_card).to have_attributes(rank: NINE, suit: CLUBS)
+          expect(hand.last).to have_attributes(rank: JACK, suit: CLUBS)
+          expect(hand.length).to eq 5
+        end
       end
-    end
 
-    it 'successfully chooses a suit, re-prompting if given invalid input' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('1', 'C')
-        suit = human_player_bidding.choose_a_suit
+      it 'successfully chooses a suit, re-prompting if given invalid input' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('1', 'C')
+          suit = human_player_bidding.choose_a_suit
 
-        expect(suit).to eq CLUBS
+          expect(suit).to eq CLUBS
+        end
       end
-    end
 
-    it 'can pass on the center card' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('2')
-        bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
+      it 'can pass on the center card' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('2')
+          bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
 
-        expect(bid[:bid]).to eq :pass
-        expect(bid[:going_alone]).to eq false
+          expect(bid[:bid]).to eq :pass
+          expect(bid[:going_alone]).to eq false
+        end
       end
-    end
 
-    it 'can order up the center card, not going alone' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('1', 'N')
-        bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
+      it 'can order up the center card, not going alone' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('1', 'N')
+          bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
 
-        expect(bid[:bid]).to eq DIAMONDS
-        expect(bid[:going_alone]).to eq false
+          expect(bid[:bid]).to eq DIAMONDS
+          expect(bid[:going_alone]).to eq false
+        end
       end
-    end
 
-    it 'can order up the center card, and go alone' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('1', 'Y')
-        bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
+      it 'can order up the center card, and go alone' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('1', 'Y')
+          bid = human_player_bidding.decide_bid(options: [DIAMONDS], card: nine_of_diamonds)
 
-        expect(bid[:bid]).to eq DIAMONDS
-        expect(bid[:going_alone]).to eq true
+          expect(bid[:bid]).to eq DIAMONDS
+          expect(bid[:going_alone]).to eq true
+        end
       end
-    end
 
-    it 'can pass in the second human_player_bidding round' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('P')
-        bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
+      it 'can pass in the second human_player_bidding round' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('P')
+          bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
 
-        expect(bid[:bid]).to eq :pass
-        expect(bid[:going_alone]).to eq false
+          expect(bid[:bid]).to eq :pass
+          expect(bid[:going_alone]).to eq false
+        end
       end
-    end
 
-    it 'can bid clubs and not go alone' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('C', 'N')
-        bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
+      it 'can bid clubs and not go alone' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('C', 'N')
+          bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
 
-        expect(bid[:bid]).to eq CLUBS
-        expect(bid[:going_alone]).to eq false
+          expect(bid[:bid]).to eq CLUBS
+          expect(bid[:going_alone]).to eq false
+        end
       end
-    end
 
-    it 'can bid clubs and go alone' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('C', 'Y')
-        bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
+      it 'can bid clubs and go alone' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('C', 'Y')
+          bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
 
-        expect(bid[:bid]).to eq CLUBS
-        expect(bid[:going_alone]).to eq true
+          expect(bid[:bid]).to eq CLUBS
+          expect(bid[:going_alone]).to eq true
+        end
       end
-    end
 
-    it 'takes the capitalized first letter of input only as the response and strips whitespace' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return('can I choose diamonds instead?', '    yep') # "C", "Y"
-        bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
+      it 'takes the capitalized first letter of input only as the response and strips whitespace' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return('can I choose diamonds instead?', '    yep') # "C", "Y"
+          bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
 
-        expect(bid[:bid]).to eq CLUBS
-        expect(bid[:going_alone]).to eq true
+          expect(bid[:bid]).to eq CLUBS
+          expect(bid[:going_alone]).to eq true
+        end
       end
-    end
 
-    it 're-prompts given invalid input' do
-      silence do
-        allow(human_player_bidding).to receive(:gets).and_return(
-          'D', # C, H, S only
-          'Diamonds', # C, H, S only
-          '%#$?!', # C, H, S only
-          '', # C, H, S only
-          '?', # C, H, S only
-          'Y', # C, H, S only
-          'Exit', # C, H, S only
-          'clubs', # accepts "C" as valid input for suit options
-          'clubs', # Y, N only
-          'help', # Y, N only
-          'yes' # accepts "Y" as valid input for going alone
-        )
-        bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
+      it 're-prompts given invalid input' do
+        silence do
+          allow(human_player_bidding).to receive(:gets).and_return(
+            'D', # C, H, S only
+            'Diamonds', # C, H, S only
+            '%#$?!', # C, H, S only
+            '', # C, H, S only
+            '?', # C, H, S only
+            'Y', # C, H, S only
+            'Exit', # C, H, S only
+            'clubs', # accepts "C" as valid input for suit options
+            'clubs', # Y, N only
+            'help', # Y, N only
+            'yes' # accepts "Y" as valid input for going alone
+          )
+          bid = human_player_bidding.decide_bid(options: [CLUBS, HEARTS, SPADES])
 
-        expect(bid[:bid]).to eq CLUBS
-        expect(bid[:going_alone]).to eq true
+          expect(bid[:bid]).to eq CLUBS
+          expect(bid[:going_alone]).to eq true
+        end
       end
     end
   end
