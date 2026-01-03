@@ -9,7 +9,7 @@ module Euchre
     # Evaluates hand and options and returns {bid: going_alone:}
     # Chooses a card to exchange: adds the given card to the hand, deletes a card from the hand, returns the deleted card)
     class ComputerPlayerBidding
-      include Constants
+      include Euchre::Constants
       include ComputerPlayerHelpers
 
       attr_writer :name

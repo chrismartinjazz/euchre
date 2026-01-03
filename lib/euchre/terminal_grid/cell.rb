@@ -23,9 +23,11 @@ module Euchre
       private
 
       def validate_contents(contents)
-        return contents.map(&:to_s) if contents.is_a?(Array)
+        return contents.dup.freeze if contents.is_a?(Array)
 
-        [contents.to_s].dup.freeze
+        return contents.to_a.freeze if contents.respond_to?(:to_a)
+
+        [contents.to_s].freeze
       end
 
       def validate_justified(justified)

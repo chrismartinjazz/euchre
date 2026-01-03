@@ -21,7 +21,7 @@ module Euchre
       @trick_manager = Managers::TrickManager.new
       @score_manager = Managers::ScoreManager.new
 
-      [@player_manager, @deal_manager, @score_manager, @display].each { |preparer| preparer.prepare(context: @context) }
+      [@player_manager, @deal_manager, @score_manager].each { |preparer| preparer.prepare(context: @context) }
     end
 
     def start_game_loop

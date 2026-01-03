@@ -7,7 +7,7 @@ module Euchre
   module Props
     # A deck of cards.
     class Deck
-      include Constants
+      include Euchre::Constants
 
       attr_reader :cards
 

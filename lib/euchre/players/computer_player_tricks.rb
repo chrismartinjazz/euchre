@@ -7,7 +7,7 @@ module Euchre
   module Players
     # Manages the playing of cards during tricks for ComputerPlayer
     class ComputerPlayerTricks
-      include Constants
+      include Euchre::Constants
       include ComputerPlayerHelpers
 
       attr_writer :name

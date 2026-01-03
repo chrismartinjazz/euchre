@@ -6,7 +6,7 @@ module Euchre
   module Players
     # Helpers for Computer Player class and related classes.
     module ComputerPlayerHelpers
-      include Constants
+      include Euchre::Constants
 
       def announce(name, input, confirmation: false)
         string = input.is_a?(Array) ? input.join(' ') : input

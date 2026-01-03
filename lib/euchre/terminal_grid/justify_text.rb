@@ -20,7 +20,7 @@ module Euchre
       end
 
       def compensate_width_for_ansi_escape(text, width)
-        width + text.scan(ANSI_ESCAPE).join.length
+        width + text.scan(TerminalGrid::ANSI_ESCAPE).join.length
       end
 
       def center_justify(text, col_width, border)

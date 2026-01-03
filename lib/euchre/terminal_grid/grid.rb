@@ -29,6 +29,7 @@ module Euchre
         @grid_context.width = GridValidator.validate_width(width) unless width == @grid_context.width
         @grid_context.border = GridValidator.validate_border(border) unless border == @grid_context.border
         @grid_layout.apply(grid_context: @grid_context)
+        @grid_rows = @grid_renderer.rows(grid_context: @grid_context)
         @grid_text = @grid_renderer.render(grid_context: @grid_context)
       end
 
@@ -40,6 +41,10 @@ module Euchre
 
       def to_s
         @grid_text
+      end
+
+      def to_a
+        @grid_rows
       end
     end
   end

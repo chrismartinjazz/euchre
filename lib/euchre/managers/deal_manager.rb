@@ -7,7 +7,7 @@ module Euchre
   module Managers
     # Manages the deck and dealing.
     class DealManager
-      include Constants
+      include Euchre::Constants
 
       def prepare(context:)
         context.dealer ||= context.player_order.sample

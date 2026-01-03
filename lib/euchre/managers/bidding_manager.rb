@@ -8,7 +8,7 @@ module Euchre
   module Managers
     # Manages bidding
     class BiddingManager
-      include Constants
+      include Euchre::Constants
 
       def initialize
         @blank_card = Props::Card.for(rank: '', suit: '')

@@ -7,7 +7,7 @@ module Euchre
   module Players
     # Manages the bidding aspects of play for the HumanPlayer
     class HumanPlayerBidding
-      include Constants
+      include Euchre::Constants
       include HumanPlayerHelpers
 
       attr_writer :name

@@ -6,70 +6,55 @@ module Euchre
   module TerminalDisplay
     # Handles displaying the tricks table
     class DisplayTricks
-      include Constants
+      include Euchre::Constants
+      include TerminalGrid
 
-      STUB_WIDTH = 4
-      MIN_COL_WIDTH = 7
-
-      def prepare(context:)
-        @col_width = calculate_col_width(context)
-      end
-
-      def table(context:)
-        table = generate_trick_table(context)
-        puts table
+      def grid(context:)
+        grid = tricks_grid(context)
+        puts grid
       end
 
       private
 
-      def calculate_col_width(context)
-        max_player_name_length = context.display_order.max_by { |player| player.to_s.length }.to_s.length
-        [max_player_name_length + 3, MIN_COL_WIDTH].max
+      def tricks_grid(context)
+        grid = [grid_header(context)]
+        0.upto(context.tricks.length - 1) { |trick_index| grid.push(grid_row(context, trick_index)) }
+        Grid.new(grid: grid, width: 80, border: Border.new(vertical: '', horizontal: '', corner: ''))
       end
 
-      def generate_trick_table(context)
-        table = [generate_trick_table_header(context)]
-        context.tricks.each_with_index do |trick, index|
-          table.push(generate_trick_table_row(trick, index, context))
-        end
-        table
-      end
-
-      def generate_trick_table_header(context)
-        cells = [SUITS[context.bid.trumps][:glyph].to_s]
+      def grid_header(context)
+        header = [
+          Cell.new(contents: ['Trumps:', SUITS[context.bid.trumps][:glyph].to_s], justified: :center, width: 7),
+          Cell.new(contents: %w[Lead suit], justified: :center, width: 5)
+        ]
         context.display_order.each do |player|
-          cells.push(context.bid.bidders.include?(player) ? "#{player.name}*" : player.name)
+          name_text = context.bid.bidders.include?(player) ? "#{player.name}*" : player.name
+          header.push(Cell.new(contents: [name_text], justified: :center))
         end
-        cells.push('Winner')
-        generate_row(cells, ' ')
+        header.push(Cell.new(contents: ['Winner'], justified: :center))
+        header
       end
 
-      def generate_trick_table_row(trick, index, context)
-        number = index + 1
-        lead_suit_glyph = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
-        cells = ["#{number}:#{lead_suit_glyph}"]
-        generate_card_cells(cells, trick, context)
-        cells.push(trick.winner ? trick.winner.to_s : '')
-        generate_row(cells, '|')
+      def grid_row(context, trick_index)
+        trick = context.tricks[trick_index]
+        number = "#{trick_index + 1}:"
+        lead_suit = trick.lead_suit.nil? ? ' ' : SUITS[trick.lead_suit][:glyph]
+        winner = trick.winner ? trick.winner.to_s : ''
+
+        row = [
+          Cell.new(contents: [number], justified: :center, width: 7),
+          Cell.new(contents: [lead_suit], justified: :center, width: 5)
+        ]
+        row.concat(grid_trick_cards(context, trick))
+        row.push(Cell.new(contents: [winner], justified: :center))
       end
 
-      def generate_card_cells(cells, trick, context)
-        context.display_order.each do |player|
-          card = trick.card(player: player).nil? ? '  ' : trick.card(player: player).to_s(trumps: context.bid.trumps)
-          winning = trick.winning_play[:card] && trick.winning_play[:card] == trick.card(player: player) ? ' *' : '  '
-          cells.push("#{card}#{winning}")
+      def grid_trick_cards(context, trick)
+        context.display_order.each.with_object([]) do |player, array|
+          card = trick.card(player: player).nil? ? '' : trick.card(player:player).to_s(trumps: context.bid.trumps)
+          winning = trick.winning_play[:card] && trick.winning_play[:card] == trick.card(player: player)
+          array.push(Cell.new(contents: winning ? ["* #{card} *"] : [card], justified: :center))
         end
-      end
-
-      def generate_row(cells, separator)
-        widths = [STUB_WIDTH].concat(Array.new(cells.length - 1) { @col_width })
-        formatted_cells = []
-        cells.each_with_index do |cell, index|
-          cell_text = " #{cell}"
-          padding = ' ' * [(widths[index] - cell_text.gsub(ANSI_ESCAPE, '').length), 0].max
-          formatted_cells.push("#{cell_text}#{padding}")
-        end
-        "#{formatted_cells.join(separator)}#{separator}"
       end
     end
   end

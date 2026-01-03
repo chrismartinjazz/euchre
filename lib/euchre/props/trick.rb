@@ -6,7 +6,7 @@ module Euchre
   module Props
     # A Trick.
     class Trick
-      include Constants
+      include Euchre::Constants
 
       attr_reader :plays, :lead_suit
 

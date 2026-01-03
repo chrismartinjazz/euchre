@@ -7,7 +7,7 @@ module Euchre
     # A playing card. Reports its rank and suit, based on the trump suit, accounting for joker and bowers.
     # In Euchre, the Jacks and the Joker are special cards.
     class Card
-      include Constants
+      include Euchre::Constants
 
       def initialize(rank:, suit:)
         @rank = rank == '' ? :blank : rank.to_s.upcase.to_sym

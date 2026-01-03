@@ -7,7 +7,7 @@ module Euchre
   module TerminalDisplay
     # Displays bidding screen
     class DisplayPlayers
-      include Constants
+      include Euchre::Constants
       include TerminalGrid
 
       def grid(context:)

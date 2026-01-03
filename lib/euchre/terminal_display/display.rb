@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# require_relative 'display_score'
-# require_relative 'display_tricks'
-# require_relative 'display_players'
-
 module Euchre
   module TerminalDisplay
     # Handle displaying the game
@@ -14,16 +10,12 @@ module Euchre
         @display_tricks = DisplayTricks.new
       end
 
-      def prepare(context:)
-        @display_tricks.prepare(context: context)
-      end
-
       def clear_screen
         system('cls') || system('clear')
       end
 
       def score(context:)
-        @display_score.scoreboard(context: context)
+        @display_score.grid(context: context)
       end
 
       def players(context:)
@@ -31,7 +23,7 @@ module Euchre
       end
 
       def tricks(context:)
-        @display_tricks.table(context: context)
+        @display_tricks.grid(context: context)
       end
 
       def message(message: '', confirmation: false)

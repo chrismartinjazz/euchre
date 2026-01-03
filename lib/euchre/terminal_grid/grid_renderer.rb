@@ -9,20 +9,23 @@ module Euchre
       end
 
       def render(grid_context:)
+        rows(grid_context: grid_context).join("\n")
+      end
+
+      def rows(grid_context:)
         return nil if grid_context.grid.nil?
 
         borders_required = grid_context.border.horizontal.length.positive?
 
-        rows = []
-        rows.push(border_row(0, grid_context, top_row: true)) if borders_required
+        my_rows = []
+        my_rows.push(border_row(0, grid_context, top_row: true)) if borders_required
 
         grid_context.grid.each_with_index do |grid_row, grid_row_index|
-          # TODO - restructure this bit
           grid_row_array = build_grid_row_array(grid_row, grid_row_index, grid_context)
           grid_row_array.push(border_row(grid_row_index, grid_context)) if borders_required
-          rows.concat(grid_row_array)
+          my_rows.concat(grid_row_array)
         end
-        rows.join("\n")
+        my_rows
       end
 
       private
