@@ -29,8 +29,9 @@ module Euchre
         @grid_context.width = GridValidator.validate_width(width) unless width == @grid_context.width
         @grid_context.border = GridValidator.validate_border(border) unless border == @grid_context.border
         @grid_layout.apply(grid_context: @grid_context)
-        @grid_rows = @grid_renderer.rows(grid_context: @grid_context)
-        @grid_text = @grid_renderer.render(grid_context: @grid_context)
+
+        @grid_array = @grid_renderer.render(grid_context: @grid_context)
+        @grid_string = @grid_array.join("\n")
       end
 
       def update_cell(cell:, row_index:, col_index:)
@@ -40,11 +41,11 @@ module Euchre
       end
 
       def to_s
-        @grid_text
+        @grid_string
       end
 
       def to_a
-        @grid_rows
+        @grid_array
       end
     end
   end

@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'game_state'
-require_relative 'terminal_display'
-require_relative 'managers'
-# require_relative 'managers/deal_manager'
-# require_relative 'managers/bidding_manager'
-# require_relative 'managers/trick_manager'
-# require_relative 'managers/score_manager'
-
 module Euchre
   # The game. Holds the context for the game and coordinates the game loop.
   class Game

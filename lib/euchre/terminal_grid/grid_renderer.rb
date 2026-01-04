@@ -2,17 +2,14 @@
 
 module Euchre
   module TerminalGrid
-    # Generates a text representation of a Grid of Cells.
+    # Generates an array of strings representing a Grid of Cells. Justifies cells as appropriate and draws on the
+    # grid_context for the dimensions of the grid.
     class GridRenderer
       def initialize
         @justify_text = JustifyText.new
       end
 
       def render(grid_context:)
-        rows(grid_context: grid_context).join("\n")
-      end
-
-      def rows(grid_context:)
         return nil if grid_context.grid.nil?
 
         borders_required = grid_context.border.horizontal.length.positive?

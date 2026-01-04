@@ -12,6 +12,7 @@ A terminal implementation of the card game Euchre, using Australian style rules 
   - Evaluate potential bidding hands and decide whether to bid and whether or not to go alone
   - Play aggressively with the best card in hand unless it cannot win the trick
   - When exchanging a card, discard off-trump, non-ace singles in preference to other lower rank cards if it holds some trumps
+- ASCII art 'cards' scoreboard using the traditional 5 and 6 cards to score.
 
 ## Code
 

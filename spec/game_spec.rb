@@ -10,7 +10,7 @@ module Euchre
       allow(game).to receive(:update_display)
       allow(game).to receive(:display_end_game_messages)
 
-      [player_manager, deal_manager, score_manager, display].each { |preparer| allow(preparer).to receive(:prepare) }
+      [player_manager, deal_manager, score_manager].each { |preparer| allow(preparer).to receive(:prepare) }
       allow(deal_manager).to receive(:deal)
       allow(trick_manager).to receive(:play_hand)
       allow(score_manager).to receive(:update_score)

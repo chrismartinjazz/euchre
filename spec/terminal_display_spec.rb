@@ -44,7 +44,6 @@ module Euchre
       players.team1 = [south, north]
       players.team2 = [west, east]
       context.score = { players.team1 => 6, players.team2 => 7 }
-      display.prepare(context: context)
       context.display_order.each { |player| player.add_to_hand(cards: deck.deal(count: 5)) }
     end
 

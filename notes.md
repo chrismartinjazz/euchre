@@ -29,7 +29,7 @@
   - [x] human_player_bidding_spec.rb
   - [x] display_spec.rb
 - [x] Adjust Card to be an object factory rather than handling jokers and bowers internally
-- [ ] Adjust 'JustifyText' to use ljust, rjust, center
+- [x] Adjust 'JustifyText' to use ljust, rjust, center
 
 ## Classes
 
